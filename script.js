@@ -8,7 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.pre_titulo) document.getElementById('pre-title').textContent = data.pre_titulo;
         if (data.titulo) document.getElementById('accent-title').textContent = data.titulo;
         if (data.subtitulo) document.getElementById('sub-title').textContent = data.subtitulo;
-        if (data.avatar) document.getElementById('profile-avatar').src = data.avatar;
+        
+        // Ajuste de ruta con barra inicial para la foto de perfil
+        if (data.avatar) {
+          const avatarUrl = data.avatar.startsWith('/') ? data.avatar : '/' + data.avatar;
+          document.getElementById('profile-avatar').src = avatarUrl;
+        }
       }
     })
     .catch(err => console.log('Usando perfil por defecto'));
@@ -24,9 +29,21 @@ document.addEventListener('DOMContentLoaded', () => {
           const article = document.createElement('article');
           article.classList.add('post-card');
 
-          // Separa saltos de línea en párrafos
-          const parrafos = post.contenido.split('\n').filter(p => p.trim() !== '');
-          const htmlParrafos = parrafos.map(p => `<p>${p}</p>`).join('');
+          // Separa saltos de línea y detecta si es texto o imagen
+          const lineas = post.contenido.split('\n').filter(p => p.trim() !== '');
+          
+          const htmlContenido = lineas.map(linea => {
+            const textoLimpio = linea.trim();
+            
+            // Detecta si es una ruta de imagen (ej. "images/foto.jpeg" o "/images/foto.jpeg")
+            if (textoLimpio.startsWith('images/') || textoLimpio.startsWith('/images/')) {
+              const src = textoLimpio.startsWith('/') ? textoLimpio : '/' + textoLimpio;
+              return `<img src="${src}" alt="Imagen del escrito" class="post-image">`;
+            }
+            
+            // Si es texto normal
+            return `<p>${textoLimpio}</p>`;
+          }).join('');
 
           article.innerHTML = `
             <span class="date">${post.fecha}</span>
@@ -34,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="excerpt">${post.resumen}</p>
             
             <div class="post-full">
-              ${htmlParrafos}
+              ${htmlContenido}
             </div>
 
             <button class="toggle-btn">Leer escrito completo</button>

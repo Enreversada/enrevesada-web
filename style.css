@@ -279,3 +279,12 @@ body {
   color: var(--accent-rose);
   border-bottom-color: var(--accent-rose);
 }
+
+.post-image {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  border-radius: 8px;
+  margin: 15px auto;
+  display: block;
+}
