@@ -1,0 +1,35 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "images"
+public_folder: "/images"
+
+collections:
+  - name: "perfil"
+    label: "Perfil y Cabecera"
+    files:
+      - file: "content/perfil.json"
+        label: "Datos de Cabecera"
+        name: "perfil"
+        fields:
+          - { label: "Frase Superior", name: "pre_titulo", widget: "string", default: "A veces, volver a ti es el comienzo de todo" }
+          - { label: "Título Principal", name: "titulo", widget: "string", default: "Enreve®sada" }
+          - { label: "Subtítulo", name: "subtitulo", widget: "string", default: "Escribo y se me pasa" }
+          - { label: "Foto de Perfil", name: "avatar", widget: "image" }
+
+  - name: "escritos_sec"
+    label: "Escritos"
+    files:
+      - file: "content/escritos.json"
+        label: "Lista de Escritos"
+        name: "escritos"
+        fields:
+          - name: "items"
+            label: "Publicaciones"
+            widget: "list"
+            fields:
+              - { label: "Título del Escrito", name: "titulo", widget: "string" }
+              - { label: "Fecha", name: "fecha", widget: "string" }
+              - { label: "Resumen", name: "resumen", widget: "text" }
+              - { label: "Texto Completo", name: "contenido", widget: "text" }

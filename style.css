@@ -1,0 +1,281 @@
+/* Variables de la portada "La Luz del Alba" */
+:root {
+  --bg-color: #FDF8F5;
+  --text-main: #1A1A1A;
+  --accent-rose: #D18E8E;
+  --detail-pink: #F2D8D8;
+  --text-muted: #737373;
+
+  --font-serif-main: 'Cormorant Garamond', Georgia, serif;
+  --font-script: 'Playball', cursive;
+  --font-sans-clean: 'Inter', sans-serif;
+}
+
+/* Reset básico */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: var(--font-serif-main);
+  line-height: 1.7;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Contenedor principal angosto */
+.container {
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+/* Estilo de Cabecera (Sección Portada) */
+.book-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.pre-title {
+  font-family: var(--font-sans-clean);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+  font-weight: 300;
+}
+
+/* Agrupador de Título y Subtítulo */
+/* Agrupador principal de foto + título */
+.brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px; /* Espacio entre la foto y el texto */
+  margin-top: 10px;
+}
+
+/* Imagen de perfil circular */
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 100%; /* Hace la foto circular */
+  object-fit: cover;  /* Mantiene las proporciones sin deformar la cara */
+  border: 3px solid var(--detail-pink); /* Sutil borde rosa pastel acorde a la portada */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Agrupador de Título y Subtítulo */
+.brand-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Alinea el texto a la izquierda de la foto */
+  text-align: left;
+}
+
+.accent-title {
+  font-family: var(--font-script);
+  color: black;
+  font-size: 3.8rem;
+  font-weight: 400;
+  margin: 0;
+  line-height: 0.9; /* Pegado vertical */
+}
+
+.sub-title {
+  font-family: var(--font-serif-main);
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 400;
+  margin-top: 4px;
+  margin-bottom: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.decorator {
+  color: var(--accent-rose);
+  font-size: 1.2rem;
+  margin-top: 15px;
+  display: block;
+}
+
+/* Borde rasgado decorativo (Paper Edge) */
+.paper-edge {
+  height: 25px;
+  margin-bottom: 60px;
+  background: linear-gradient(to right, var(--detail-pink) 0%, transparent 100%);
+  border-bottom: 1px solid var(--detail-pink);
+  box-shadow: 0 4px 6px rgba(242, 216, 216, 0.3);
+}
+
+/* Formulario de Suscripción */
+.newsletter-form {
+  display: flex;
+  gap: 12px;
+  margin-top: 40px;
+  justify-content: center;
+}
+
+.newsletter-form input {
+  padding: 14px 18px;
+  border: 1px solid var(--detail-pink);
+  border-radius: 8px;
+  font-family: var(--font-sans-clean);
+  font-size: 0.95rem;
+  width: 300px;
+  background-color: #ffffff;
+  outline: none;
+}
+
+.newsletter-form input:focus {
+  border-color: var(--accent-rose);
+  box-shadow: 0 0 0 3px rgba(209, 142, 142, 0.1);
+}
+
+.newsletter-form button {
+  background: var(--accent-rose);
+  color: #ffffff;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-sans-clean);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: background 0.2s;
+}
+
+.newsletter-form button:hover {
+  background: #C47F7F;
+}
+
+/* Secciones de Entradas */
+.feed {
+  margin-top: 40px;
+}
+
+.author-label {
+  font-family: var(--font-sans-clean);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 50px;
+  position: relative;
+}
+
+.author-label:after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--detail-pink);
+  margin: 15px auto 0;
+}
+
+.post-card {
+  margin-bottom: 45px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--detail-pink);
+}
+
+.date {
+  font-family: var(--font-sans-clean);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.post-card h3 {
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: var(--text-main);
+  margin: 0 0 12px 0;
+}
+
+.excerpt {
+  font-family: var(--font-serif-main);
+  color: #4a4a4a;
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* Texto desplegado */
+.post-full {
+  display: none;
+  margin-top: 20px;
+  border-top: 1px dashed var(--detail-pink);
+  padding-top: 20px;
+  font-size: 1.05rem;
+  color: var(--text-main);
+}
+
+.post-full p {
+  margin-bottom: 15px;
+}
+
+/* Botón de desplegar */
+.toggle-btn {
+  background: none;
+  border: none;
+  color: var(--accent-rose);
+  font-family: var(--font-sans-clean);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0;
+  cursor: pointer;
+  margin-top: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.toggle-btn:hover {
+  color: #C47F7F;
+  text-decoration: underline;
+}
+
+/* Pie de página */
+.main-footer {
+  text-align: center;
+  margin-top: 80px;
+  padding-top: 30px;
+}
+
+.divider {
+  width: 100px;
+  height: 1px;
+  background: var(--detail-pink);
+  margin: 0 auto;
+}
+
+.author-credit {
+  font-family: var(--font-sans-clean);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  margin-top: 10px;
+}
+
+
+
+/* Estilo del enlace de Instagram dentro de author-label */
+.instagram-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease, border-bottom 0.2s ease;
+  border-bottom: 1px dashed transparent;
+}
+
+/* Efecto al pasar el cursor */
+.instagram-link:hover {
+  color: var(--accent-rose);
+  border-bottom-color: var(--accent-rose);
+}

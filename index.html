@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enreve®sada</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500;700&family=Playball&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+
+<body>
+  <main class="container">
+
+    <!-- Cabecera de Portada -->
+    <header class="book-header">
+      <div class="portada-wrapper">
+        <!-- Añadido id="pre-title" -->
+        <p id="pre-title" class="pre-title">"De todas las constelaciones elijo su luz"</p>
+
+        <!-- Bloque de título + subtítulo + imagen circular -->
+        <div class="brand-header">
+          <!-- Añadido id="profile-avatar" -->
+          <img id="profile-avatar" src="autor.jpeg" alt="Foto de Enrevesada" class="profile-avatar">
+          <div class="brand-title">
+            <!-- Añadidos id="accent-title" e id="sub-title" -->
+            <h1 id="accent-title" class="accent-title">Enreve®sada</h1>
+            <p id="sub-title" class="sub-title">Escribo y se me pasa</p>
+          </div>
+        </div>
+
+        <!-- Elemento decorativo: el pequeño corazón -->
+        <span class="decorator">&#10084;</span>
+      </div>
+
+      <!-- Captura de suscriptores -->
+      <form class="newsletter-form">
+        <input type="email" placeholder="Recibe el primer capítulo en tu correo..." required>
+        <button type="submit">Empezar a leer</button>
+      </form>
+    </header>
+
+    <div class="paper-edge"></div>
+
+    <!-- Secciones de Contenido (Feed) -->
+    <section class="feed">
+      <h2 class="author-label">
+        Instagram:
+        <a href="https://www.instagram.com/laudoblec" target="_blank" rel="noopener noreferrer" class="instagram-link">
+           @laudoblec
+        </a>
+      </h2>
+
+      <!-- Los artículos estáticos se reemplazan por este contenedor para la carga dinámica desde el CMS -->
+      <div id="posts-container"></div>
+    </section>
+
+    <footer class="main-footer">
+      <div class="divider"></div>
+      <span class="decorator">&#10084;</span>
+      <p class="author-credit">Enreve®sada &reg;</p>
+    </footer>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
