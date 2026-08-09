@@ -42,10 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const textoShare = encodeURIComponent(`Lee este escrito: "${post.titulo}"`);
           const whatsappUrl = `https://api.whatsapp.com/send?text=${textoShare}%20${urlWeb}`;
 
-          // Identificador seguro para conectar con Cusdis
-          const pageId = post.id || post.titulo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-          const cusdisIframeUrl = `https://cusdis.com/api/open/html?app_id=60f733d0-c006-4fef-845a-e66e26f4ff77&page_id=${encodeURIComponent(pageId)}&page_url=${urlWeb}&page_title=${encodeURIComponent(post.titulo)}`;
-
           article.innerHTML = `
             <span class="date">${post.fecha}</span>
             <h3>${post.titulo}</h3>
@@ -73,21 +69,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
               <div class="comments-dropdown" style="display: none;">
                 <p class="comments-title">Comentarios</p>
-                <div class="cusdis-container">
-                  <iframe
-                    src="${cusdisIframeUrl}"
-                    width="100%"
-                    height="380"
-                    style="border:none; overflow:hidden; border-radius: 8px; margin-top: 10px;"
-                  ></iframe>
-                </div>
+                <div class="cusdis-container"></div>
               </div>
             </div>
 
             <button class="toggle-btn">Leer escrito completo</button>
           `;
 
-          // Lógica de Likes (Local)
+          // Lógica de Likes
           const likeBtn = article.querySelector('.like-btn');
           const likeCount = article.querySelector('.like-count');
           let likes = parseInt(localStorage.getItem(`likes_post_${index}`) || '0');
@@ -102,13 +91,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
 
-          // Lógica Desplegable de Comentarios
+          // Lógica Carga Dinámica de Cusdis
           const commentBtn = article.querySelector('.comment-toggle-btn');
           const commentsDropdown = article.querySelector('.comments-dropdown');
+          const cusdisContainer = article.querySelector('.cusdis-container');
 
           commentBtn.addEventListener('click', () => {
             const isHidden = commentsDropdown.style.display === 'none';
-            commentsDropdown.style.display = isHidden ? 'block' : 'none';
+            
+            if (isHidden) {
+              commentsDropdown.style.display = 'block';
+              
+              // Cargar Cusdis únicamente si no ha sido cargado en este post
+              if (!cusdisContainer.innerHTML.trim()) {
+                cusdisContainer.innerHTML = `
+                  <div id="cusdis_thread"
+                    data-host="https://cusdis.com"
+                    data-app-id="60f733d0-c006-4fef-845a-e66e26f4ff77"
+                    data-page-id="post-${index}"
+                    data-page-url="${window.location.href}"
+                    data-page-title="${post.titulo}"
+                  ></div>
+                `;
+                
+                if (window.CUSDIS) {
+                  window.CUSDIS.initial();
+                }
+              }
+            } else {
+              commentsDropdown.style.display = 'none';
+            }
           });
 
           // Plegable de lectura completa
@@ -127,6 +139,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
           container.appendChild(article);
         });
+
+        // Configuración de idioma Cusdis
+        window.CUSDIS_LOCALE = {
+          powered_by: 'Comentarios',
+          post_comment: 'Publicar comentario',
+          loading: 'Cargando...',
+          email: 'Correo electrónico (opcional)',
+          nickname: 'Nombre o Apodo',
+          reply_placeholder: 'Escribe tu comentario aquí...',
+          reply_btn: 'Responder',
+          sending: 'Enviando...',
+          mod_badge: 'Mod',
+          content_is_required: 'El comentario no puede estar vacío',
+          nickname_is_required: 'El nombre es obligatorio',
+          comment_has_been_submitted: 'Comentario enviado con éxito'
+        };
+
+        const scriptCusdis = document.createElement('script');
+        scriptCusdis.src = 'https://cusdis.com/js/cusdis.es.js';
+        scriptCusdis.async = true;
+        scriptCusdis.defer = true;
+        document.body.appendChild(scriptCusdis);
       }
     })
     .catch(err => console.log('Esperando publicaciones...'));
