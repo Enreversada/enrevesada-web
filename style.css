@@ -326,9 +326,19 @@ body {
   transition: all 0.3s ease;
 }
 
+/* Corrección para el botón Me gusta */
 .like-btn.liked {
-  background-color: #d4a3a3;
-  color: #fff;
+  background-color: transparent !important;
+}
+
+.like-btn.liked svg {
+  fill: #d4a3a3 !important;
+  stroke: #d4a3a3 !important;
+}
+
+.like-btn.liked .like-count {
+  color: #d4a3a3 !important;
+  font-weight: bold;
 }
 
 .share-btn {

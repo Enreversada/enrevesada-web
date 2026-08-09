@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return `<p>${textoLimpio}</p>`;
           }).join('');
 
-          // Enlace seguro WhatsApp
           const urlWeb = encodeURIComponent(window.location.href);
           const textoShare = encodeURIComponent(`Lee este escrito: "${post.titulo}"`);
           const whatsappUrl = `https://api.whatsapp.com/send?text=${textoShare}%20${urlWeb}`;
@@ -51,37 +50,26 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="post-full" style="display: none;">
               ${htmlContenido}
               
-              <!-- BARRA DE ACCIONES ESTILO SUBSTACK -->
               <div class="post-actions">
                 <div class="left-actions">
-                  <!-- Botón Me gusta -->
                   <button class="icon-btn like-btn" id="like-${index}" title="Me gusta">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                     <span class="like-count">0</span>
                   </button>
 
-                  <!-- Botón Comentarios -->
                   <button class="icon-btn comment-toggle-btn" title="Comentar">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                   </button>
                 </div>
 
-                <!-- Botón Compartir -->
                 <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="share-btn">
                   Compartir
                 </a>
               </div>
 
-              <!-- DESPLEGABLE DE COMENTARIOS -->
               <div class="comments-dropdown" style="display: none;">
                 <p class="comments-title">Comentarios</p>
-                <div id="cusdis_thread"
-                  data-host="https://cusdis.com"
-                  data-app-id="60f733d0-c006-4fef-845a-e66e26f4ff77"
-                  data-page-id="post-${index}"
-                  data-page-url="${window.location.href}"
-                  data-page-title="${post.titulo}"
-                ></div>
+                <div class="cusdis-container"></div>
               </div>
             </div>
 
@@ -103,13 +91,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
 
-          // Lógica Desplegable de Comentarios
+          // Lógica Carga Dinámica de Cusdis
           const commentBtn = article.querySelector('.comment-toggle-btn');
           const commentsDropdown = article.querySelector('.comments-dropdown');
+          const cusdisContainer = article.querySelector('.cusdis-container');
 
           commentBtn.addEventListener('click', () => {
             const isHidden = commentsDropdown.style.display === 'none';
-            commentsDropdown.style.display = isHidden ? 'block' : 'none';
+            
+            if (isHidden) {
+              commentsDropdown.style.display = 'block';
+              
+              // Cargar Cusdis únicamente si no ha sido cargado en este post
+              if (!cusdisContainer.innerHTML.trim()) {
+                cusdisContainer.innerHTML = `
+                  <div id="cusdis_thread"
+                    data-host="https://cusdis.com"
+                    data-app-id="60f733d0-c006-4fef-845a-e66e26f4ff77"
+                    data-page-id="post-${index}"
+                    data-page-url="${window.location.href}"
+                    data-page-title="${post.titulo}"
+                  ></div>
+                `;
+                
+                if (window.CUSDIS) {
+                  window.CUSDIS.initial();
+                }
+              }
+            } else {
+              commentsDropdown.style.display = 'none';
+            }
           });
 
           // Plegable de lectura completa
@@ -129,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
           container.appendChild(article);
         });
 
-        // Configuración de textos en español para Cusdis
+        // Configuración de idioma Cusdis
         window.CUSDIS_LOCALE = {
           powered_by: 'Comentarios',
           post_comment: 'Publicar comentario',
@@ -145,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
           comment_has_been_submitted: 'Comentario enviado con éxito'
         };
 
-        // Script de Cusdis
         const scriptCusdis = document.createElement('script');
         scriptCusdis.src = 'https://cusdis.com/js/cusdis.es.js';
         scriptCusdis.async = true;
