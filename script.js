@@ -42,6 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
           const textoShare = encodeURIComponent(`Lee este escrito: "${post.titulo}"`);
           const whatsappUrl = `https://api.whatsapp.com/send?text=${textoShare}%20${urlWeb}`;
 
+          // Identificador para Cusdis
+          const pageId = post.id || post.titulo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
           article.innerHTML = `
             <span class="date">${post.fecha}</span>
             <h3>${post.titulo}</h3>
@@ -69,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
               <div class="comments-dropdown" style="display: none;">
                 <p class="comments-title">Comentarios</p>
-                <div class="cusdis-container"></div>
+                <div class="cusdis-slot"></div>
               </div>
             </div>
 
@@ -91,30 +94,34 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
 
-          // Lógica Carga Dinámica de Cusdis
+          // Lógica Desplegable de Comentarios Dinámica
           const commentBtn = article.querySelector('.comment-toggle-btn');
           const commentsDropdown = article.querySelector('.comments-dropdown');
-          const cusdisContainer = article.querySelector('.cusdis-container');
+          const cusdisSlot = article.querySelector('.cusdis-slot');
 
           commentBtn.addEventListener('click', () => {
             const isHidden = commentsDropdown.style.display === 'none';
-            
+
             if (isHidden) {
               commentsDropdown.style.display = 'block';
-              
-              // Cargar Cusdis únicamente si no ha sido cargado en este post
-              if (!cusdisContainer.innerHTML.trim()) {
-                cusdisContainer.innerHTML = `
-                  <div id="cusdis_thread"
-                    data-host="https://cusdis.com"
-                    data-app-id="60f733d0-c006-4fef-845a-e66e26f4ff77"
-                    data-page-id="post-${index}"
-                    data-page-url="${window.location.href}"
-                    data-page-title="${post.titulo}"
-                  ></div>
-                `;
-                
-                if (window.CUSDIS) {
+
+              // Cargar Cusdis únicamente cuando se abre este cajón
+              if (!cusdisSlot.querySelector('#cusdis_thread')) {
+                // Eliminar cualquier otro hilo abierto anteriormente
+                const oldThread = document.getElementById('cusdis_thread');
+                if (oldThread) oldThread.remove();
+
+                const threadDiv = document.createElement('div');
+                threadDiv.id = 'cusdis_thread';
+                threadDiv.setAttribute('data-host', 'https://cusdis.com');
+                threadDiv.setAttribute('data-app-id', '60f733d0-c006-4fef-845a-e66e26f4ff77');
+                threadDiv.setAttribute('data-page-id', pageId);
+                threadDiv.setAttribute('data-page-url', window.location.href);
+                threadDiv.setAttribute('data-page-title', post.titulo);
+
+                cusdisSlot.appendChild(threadDiv);
+
+                if (window.CUSDIS && typeof window.CUSDIS.initial === 'function') {
                   window.CUSDIS.initial();
                 }
               }
@@ -140,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
           container.appendChild(article);
         });
 
-        // Configuración de idioma Cusdis
+        // Configuración e inyección del script de Cusdis en español
         window.CUSDIS_LOCALE = {
           powered_by: 'Comentarios',
           post_comment: 'Publicar comentario',
@@ -153,14 +160,17 @@ document.addEventListener('DOMContentLoaded', () => {
           mod_badge: 'Mod',
           content_is_required: 'El comentario no puede estar vacío',
           nickname_is_required: 'El nombre es obligatorio',
-          comment_has_been_submitted: 'Comentario enviado con éxito'
+          comment_has_been_submitted: 'Comentario enviado con éxito y pendiente de aprobación'
         };
 
-        const scriptCusdis = document.createElement('script');
-        scriptCusdis.src = 'https://cusdis.com/js/cusdis.es.js';
-        scriptCusdis.async = true;
-        scriptCusdis.defer = true;
-        document.body.appendChild(scriptCusdis);
+        if (!document.getElementById('cusdis-script')) {
+          const scriptCusdis = document.createElement('script');
+          scriptCusdis.id = 'cusdis-script';
+          scriptCusdis.src = 'https://cusdis.com/js/cusdis.es.js';
+          scriptCusdis.async = true;
+          scriptCusdis.defer = true;
+          document.body.appendChild(scriptCusdis);
+        }
       }
     })
     .catch(err => console.log('Esperando publicaciones...'));
