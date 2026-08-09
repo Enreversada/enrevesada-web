@@ -1,31 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  // 1. Cargar el script oficial de Cusdis globalmente una sola vez
-  if (!document.getElementById('cusdis-script')) {
-    window.CUSDIS_LOCALE = {
-      powered_by: 'Comentarios',
-      post_comment: 'Publicar comentario',
-      loading: 'Cargando...',
-      email: 'Correo electrónico (opcional)',
-      nickname: 'Nombre o Apodo',
-      reply_placeholder: 'Escribe tu comentario aquí...',
-      reply_btn: 'Responder',
-      sending: 'Enviando...',
-      mod_badge: 'Mod',
-      content_is_required: 'El comentario no puede estar vacío',
-      nickname_is_required: 'El nombre es obligatorio',
-      comment_has_been_submitted: 'Comentario enviado y pendiente de aprobación'
-    };
-
-    const script = document.createElement('script');
-    script.id = 'cusdis-script';
-    script.src = 'https://cusdis.com/js/cusdis.es.js';
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-  }
-
-  // 2. Cargar Perfil y Cabecera
+  // 1. Cargar Perfil y Cabecera
   fetch('content/perfil.json')
     .then(res => res.ok ? res.json() : null)
     .then(data => {
@@ -41,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(() => console.log('Usando perfil por defecto'));
 
-  // 3. Cargar Escritos
+  // 2. Cargar Escritos
   const container = document.getElementById('posts-container');
 
   fetch('content/escritos.json')
@@ -67,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const textoShare = encodeURIComponent(`Lee este escrito: "${post.titulo}"`);
         const whatsappUrl = `https://api.whatsapp.com/send?text=${textoShare}%20${encodeURIComponent(urlWeb)}`;
 
-        // Identificador persistente
+        // Identificador persistente para Cusdis
         const pageId = post.id || post.titulo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
         article.innerHTML = `
@@ -95,9 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
               </a>
             </div>
 
-            <div class="comments-dropdown" style="display: none;">
+            <div class="comments-dropdown" style="display: none; margin-top: 15px;">
               <p class="comments-title">Comentarios</p>
-              <div class="cusdis-slot"></div>
+              <div class="cusdis-slot" style="min-height: 450px; background: rgba(0,0,0,0.02); border-radius: 8px; padding: 10px;">
+                <p style="color: #888; font-size: 0.9em; text-align: center; padding-top: 20px;">Cargando comentarios...</p>
+              </div>
             </div>
           </div>
 
@@ -119,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        // Renderizado dinámico de comentarios al desplegar
+        // Lógica de Desplegado e Inyección Directa por Iframe
         const commentBtn = article.querySelector('.comment-toggle-btn');
         const commentsDropdown = article.querySelector('.comments-dropdown');
         const cusdisSlot = article.querySelector('.cusdis-slot');
@@ -130,38 +107,26 @@ document.addEventListener('DOMContentLoaded', () => {
           if (isHidden) {
             commentsDropdown.style.display = 'block';
 
-            if (!cusdisSlot.hasChildNodes()) {
-              // Limpiar otros contenedores abiertos
-              document.querySelectorAll('.cusdis-slot').forEach(s => s.innerHTML = '');
+            if (!cusdisSlot.querySelector('iframe')) {
+              const appId = '60f733d0-c006-4fef-845a-e66e26f4ff77';
+              const encodedUrl = encodeURIComponent(window.location.href);
+              const encodedTitle = encodeURIComponent(post.titulo);
+              const iframeUrl = `https://cusdis.com/api/open/html?app_id=${appId}&page_id=${encodeURIComponent(pageId)}&page_url=${encodedUrl}&page_title=${encodedTitle}&lang=es`;
 
-              const thread = document.createElement('div');
-              thread.id = 'cusdis_thread';
-              thread.dataset.host = 'https://cusdis.com';
-              thread.dataset.appId = '60f733d0-c006-4fef-845a-e66e26f4ff77';
-              thread.dataset.pageId = pageId;
-              thread.dataset.pageUrl = urlWeb;
-              thread.dataset.pageTitle = post.titulo;
-
-              cusdisSlot.appendChild(thread);
-
-              const ejecutarRender = () => {
-                if (window.CUSDIS && typeof window.CUSDIS.render === 'function') {
-                  window.CUSDIS.render(thread);
-                }
-              };
-
-              if (window.CUSDIS) {
-                ejecutarRender();
-              } else {
-                document.getElementById('cusdis-script').addEventListener('load', ejecutarRender);
-              }
+              cusdisSlot.innerHTML = `
+                <iframe 
+                  src="${iframeUrl}" 
+                  style="width: 100%; height: 500px; border: none; overflow: auto; display: block;" 
+                  title="Comentarios Cusdis"
+                ></iframe>
+              `;
             }
           } else {
             commentsDropdown.style.display = 'none';
           }
         });
 
-        // Toggle escrito completo
+        // Plegable de lectura completa
         const btn = article.querySelector('.toggle-btn');
         const postFull = article.querySelector('.post-full');
 
