@@ -74,16 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
               <!-- DESPLEGABLE DE COMENTARIOS (Oculto por defecto) -->
               <div class="comments-dropdown" style="display: none;">
-                <p class="comments-title">Comentarios</p>
-                <div id="cusdis_thread"
-                  data-host="https://cusdis.com"
-                  data-app-id="60f733d0-c006-4fef-845a-e66e26f4ff77"
-                  data-page-id="${post.titulo.replace(/\s+/g, '-').toLowerCase()}"
-                  data-page-url="${window.location.href}"
-                  data-page-title="${post.titulo}"
-                ></div>
-              </div>
-            </div>
+              <p class="comments-title">Comentarios</p>
+              <div id="cusdis_thread"
+              data-host="https://cusdis.com"
+              data-app-id="60f733d0-c006-4fef-845a-e66e26f4ff77"
+              data-page-id="post-${index}"
+              data-page-url="${window.location.href}"
+              data-page-title="${post.titulo}"
+            ></div>
+          </div>
 
             <button class="toggle-btn">Leer escrito completo</button>
           `;
