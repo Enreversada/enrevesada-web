@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  // 1. Cargar Perfil (Silencia el error 404 si el archivo no existe)
-  fetch('content/perfil.json')
+  // 1. Cargar Perfil desde la raíz (corrige el error 404 de la consola)
+  fetch('perfil.json')
     .then(res => res.ok ? res.json() : null)
     .then(data => {
       if (data) {
@@ -14,9 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     })
-    .catch(() => {});
+    .catch(() => console.log('Usando perfil por defecto'));
 
-  // 2. Cargar Escritos
+  // 2. Cargar Escritos desde content/escritos.json
   const container = document.getElementById('posts-container');
 
   fetch('content/escritos.json')
@@ -42,8 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const textoShare = encodeURIComponent(`Lee este escrito: "${post.titulo}"`);
         const whatsappUrl = `https://api.whatsapp.com/send?text=${textoShare}%20${encodeURIComponent(urlWeb)}`;
 
-        // Si el post en escritos.json tiene un field "id", usa ese. Si no, usa el título normalizado.
-        const pageId = post.id || post.titulo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        // Transforma "Agosto" a "agosto" para coincidir con tu panel de Cusdis
+        const pageId = (post.id || post.titulo).toLowerCase().trim();
 
         article.innerHTML = `
           <span class="date">${post.fecha}</span>
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="comments-dropdown" style="display: none; margin-top: 15px;">
               <p class="comments-title">Comentarios</p>
-              <div class="cusdis-slot" style="min-height: 300px;"></div>
+              <div class="cusdis-slot"></div>
             </div>
           </div>
 
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        // Lógica de Desplegado de Comentarios
+        // Desplegable de comentarios (Inyección bajo demanda)
         const commentBtn = article.querySelector('.comment-toggle-btn');
         const commentsDropdown = article.querySelector('.comments-dropdown');
         const cusdisSlot = article.querySelector('.cusdis-slot');
@@ -105,22 +105,18 @@ document.addEventListener('DOMContentLoaded', () => {
           if (isHidden) {
             commentsDropdown.style.display = 'block';
 
-            // Muestra en la consola el ID exacto utilizado
-            console.log(`[Cusdis Debug] Solicitando comentarios para Post: "${post.titulo}" | Page ID: "${pageId}"`);
-
             if (!cusdisSlot.querySelector('iframe')) {
               const appId = '60f733d0-c006-4fef-845a-e66e26f4ff77';
-              const encodedUrl = encodeURIComponent(window.location.href);
-              const encodedTitle = encodeURIComponent(post.titulo);
-              const iframeUrl = `https://cusdis.com/api/open/html?app_id=${appId}&page_id=${encodeURIComponent(pageId)}&page_url=${encodedUrl}&page_title=${encodedTitle}&lang=es`;
+              const iframeSrc = `https://cusdis.com/api/open/html?app_id=${appId}&page_id=${encodeURIComponent(pageId)}&page_url=${encodeURIComponent(urlWeb)}&page_title=${encodeURIComponent(post.titulo)}&lang=es`;
 
-              cusdisSlot.innerHTML = `
-                <iframe 
-                  src="${iframeUrl}" 
-                  style="width: 100%; height: 450px; border: none; overflow: auto; display: block;" 
-                  title="Comentarios Cusdis"
-                ></iframe>
-              `;
+              const iframe = document.createElement('iframe');
+              iframe.src = iframeSrc;
+              iframe.style.width = '100%';
+              iframe.style.height = '480px';
+              iframe.style.border = 'none';
+              iframe.style.display = 'block';
+
+              cusdisSlot.appendChild(iframe);
             }
           } else {
             commentsDropdown.style.display = 'none';
