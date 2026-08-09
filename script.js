@@ -129,6 +129,23 @@ document.addEventListener('DOMContentLoaded', () => {
           container.appendChild(article);
         });
 
+
+        // Configuración de textos en español para Cusdis
+        window.CUSDIS_LOCALE = {
+          powered_by: 'Comentarios',
+          post_comment: 'Publicar comentario',
+          loading: 'Cargando...',
+          email: 'Correo electrónico (opcional)',
+          nickname: 'Nombre o Apodo',
+          reply_placeholder: 'Escribe tu comentario aquí...',
+          reply_btn: 'Responder',
+          sending: 'Enviando...',
+          mod_badge: 'Mod',
+          content_is_required: 'El comentario no puede estar vacío',
+          nickname_is_required: 'El nombre es obligatorio',
+          comment_has_been_submitted: 'Comentario enviado con éxito'
+        };
+
         // Script de Cusdis
         const scriptCusdis = document.createElement('script');
         scriptCusdis.src = 'https://cusdis.com/js/cusdis.es.js';
