@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  // 1. Cargar Perfil y Cabecera
+  // 1. Cargar Perfil (Silencia el error 404 si el archivo no existe)
   fetch('content/perfil.json')
     .then(res => res.ok ? res.json() : null)
     .then(data => {
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     })
-    .catch(() => console.log('Usando perfil por defecto'));
+    .catch(() => {});
 
   // 2. Cargar Escritos
   const container = document.getElementById('posts-container');
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const textoShare = encodeURIComponent(`Lee este escrito: "${post.titulo}"`);
         const whatsappUrl = `https://api.whatsapp.com/send?text=${textoShare}%20${encodeURIComponent(urlWeb)}`;
 
-        // Identificador persistente para Cusdis
+        // Si el post en escritos.json tiene un field "id", usa ese. Si no, usa el título normalizado.
         const pageId = post.id || post.titulo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
         article.innerHTML = `
@@ -72,9 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="comments-dropdown" style="display: none; margin-top: 15px;">
               <p class="comments-title">Comentarios</p>
-              <div class="cusdis-slot" style="min-height: 450px; background: rgba(0,0,0,0.02); border-radius: 8px; padding: 10px;">
-                <p style="color: #888; font-size: 0.9em; text-align: center; padding-top: 20px;">Cargando comentarios...</p>
-              </div>
+              <div class="cusdis-slot" style="min-height: 300px;"></div>
             </div>
           </div>
 
@@ -96,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        // Lógica de Desplegado e Inyección Directa por Iframe
+        // Lógica de Desplegado de Comentarios
         const commentBtn = article.querySelector('.comment-toggle-btn');
         const commentsDropdown = article.querySelector('.comments-dropdown');
         const cusdisSlot = article.querySelector('.cusdis-slot');
@@ -107,6 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (isHidden) {
             commentsDropdown.style.display = 'block';
 
+            // Muestra en la consola el ID exacto utilizado
+            console.log(`[Cusdis Debug] Solicitando comentarios para Post: "${post.titulo}" | Page ID: "${pageId}"`);
+
             if (!cusdisSlot.querySelector('iframe')) {
               const appId = '60f733d0-c006-4fef-845a-e66e26f4ff77';
               const encodedUrl = encodeURIComponent(window.location.href);
@@ -116,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
               cusdisSlot.innerHTML = `
                 <iframe 
                   src="${iframeUrl}" 
-                  style="width: 100%; height: 500px; border: none; overflow: auto; display: block;" 
+                  style="width: 100%; height: 450px; border: none; overflow: auto; display: block;" 
                   title="Comentarios Cusdis"
                 ></iframe>
               `;
@@ -126,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        // Plegable de lectura completa
+        // Toggle escrito completo
         const btn = article.querySelector('.toggle-btn');
         const postFull = article.querySelector('.post-full');
 
