@@ -17,6 +17,21 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(err => console.log('Usando perfil por defecto'));
 
+  // Listener para ajustar automáticamente la altura del iframe cuando Cusdis responda
+  window.addEventListener('message', (event) => {
+    try {
+      const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+      if (data && data.target === 'cusdis' && data.type === 'resize') {
+        const activeIframe = document.querySelector('.cusdis-slot iframe');
+        if (activeIframe && data.data) {
+          activeIframe.style.height = `${data.data}px`;
+        }
+      }
+    } catch (e) {
+      // Ignorar mensajes que no provengan de Cusdis
+    }
+  });
+
   // 2. Cargar Escritos
   const container = document.getElementById('posts-container');
 
@@ -42,8 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const textoShare = encodeURIComponent(`Lee este escrito: "${post.titulo}"`);
           const whatsappUrl = `https://api.whatsapp.com/send?text=${textoShare}%20${urlWeb}`;
 
-          // Identificador persistente basado en el título
-          const pageId = post.titulo.replace(/\s+/g, '-').toLowerCase();
+          // Identificador normalizado basado en el título
+          const pageId = post.id || post.titulo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
           article.innerHTML = `
             <span class="date">${post.fecha}</span>
@@ -94,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
 
-          // Lógica Desplegable de Comentarios (Iframe directo e infalible)
+          // Lógica Desplegable de Comentarios
           const commentBtn = article.querySelector('.comment-toggle-btn');
           const commentsDropdown = article.querySelector('.comments-dropdown');
           const cusdisSlot = article.querySelector('.cusdis-slot');
@@ -103,23 +118,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const isHidden = commentsDropdown.style.display === 'none';
 
             if (isHidden) {
+              // 1. Mostrar el contenedor ANTES de inyectar el iframe
               commentsDropdown.style.display = 'block';
 
-              // Si el iframe aún no existe en este desplegable, lo crea
+              // 2. Limpiar otros bloques de comentarios activos
+              document.querySelectorAll('.cusdis-slot').forEach(slot => {
+                if (slot !== cusdisSlot) slot.innerHTML = '';
+              });
+
+              // 3. Inyectar iframe con min-height explícito
               if (!cusdisSlot.querySelector('iframe')) {
                 const appId = '60f733d0-c006-4fef-845a-e66e26f4ff77';
                 const pageUrl = encodeURIComponent(window.location.href);
                 const pageTitle = encodeURIComponent(post.titulo);
                 
-                // URL exacta de la Widget API de Cusdis en español
-                const iframeSrc = `https://cusdis.com/api/open/html?app_id=${appId}&page_id=${pageId}&page_url=${pageUrl}&page_title=${pageTitle}&lang=es`;
-
                 const iframe = document.createElement('iframe');
-                iframe.src = iframeSrc;
+                iframe.src = `https://cusdis.com/api/open/html?app_id=${appId}&page_id=${encodeURIComponent(pageId)}&page_url=${pageUrl}&page_title=${pageTitle}&lang=es`;
                 iframe.style.width = '100%';
-                iframe.style.height = '420px';
+                iframe.style.minHeight = '350px';
                 iframe.style.border = 'none';
-                iframe.style.marginTop = '10px';
+                iframe.style.overflow = 'hidden';
 
                 cusdisSlot.appendChild(iframe);
               }
