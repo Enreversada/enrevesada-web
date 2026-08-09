@@ -42,8 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const textoShare = encodeURIComponent(`Lee este escrito: "${post.titulo}"`);
           const whatsappUrl = `https://api.whatsapp.com/send?text=${textoShare}%20${urlWeb}`;
 
-          // Identificador para Cusdis
-          const pageId = post.id || post.titulo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+          // Mantiene el identificador original asociado a tu comentario aprobado en el panel
+          const pageId = post.titulo.replace(/\s+/g, '-').toLowerCase();
 
           article.innerHTML = `
             <span class="date">${post.fecha}</span>
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
 
-          // Lógica Desplegable de Comentarios Dinámica
+          // Lógica Desplegable de Comentarios
           const commentBtn = article.querySelector('.comment-toggle-btn');
           const commentsDropdown = article.querySelector('.comments-dropdown');
           const cusdisSlot = article.querySelector('.cusdis-slot');
@@ -105,24 +105,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isHidden) {
               commentsDropdown.style.display = 'block';
 
-              // Cargar Cusdis únicamente cuando se abre este cajón
+              // Inyecta y fuerza la renderización de Cusdis en el post actual
               if (!cusdisSlot.querySelector('#cusdis_thread')) {
-                // Eliminar cualquier otro hilo abierto anteriormente
                 const oldThread = document.getElementById('cusdis_thread');
                 if (oldThread) oldThread.remove();
 
                 const threadDiv = document.createElement('div');
                 threadDiv.id = 'cusdis_thread';
-                threadDiv.setAttribute('data-host', 'https://cusdis.com');
-                threadDiv.setAttribute('data-app-id', '60f733d0-c006-4fef-845a-e66e26f4ff77');
-                threadDiv.setAttribute('data-page-id', pageId);
-                threadDiv.setAttribute('data-page-url', window.location.href);
-                threadDiv.setAttribute('data-page-title', post.titulo);
+                threadDiv.dataset.host = 'https://cusdis.com';
+                threadDiv.dataset.appId = '60f733d0-c006-4fef-845a-e66e26f4ff77';
+                threadDiv.dataset.pageId = pageId;
+                threadDiv.dataset.pageUrl = window.location.href;
+                threadDiv.dataset.pageTitle = post.titulo;
 
                 cusdisSlot.appendChild(threadDiv);
 
-                if (window.CUSDIS && typeof window.CUSDIS.initial === 'function') {
-                  window.CUSDIS.initial();
+                if (window.CUSDIS && typeof window.CUSDIS.render === 'function') {
+                  window.CUSDIS.render(threadDiv);
                 }
               }
             } else {
@@ -147,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
           container.appendChild(article);
         });
 
-        // Configuración e inyección del script de Cusdis en español
+        // Configuración de textos e inyección del script Cusdis
         window.CUSDIS_LOCALE = {
           powered_by: 'Comentarios',
           post_comment: 'Publicar comentario',
