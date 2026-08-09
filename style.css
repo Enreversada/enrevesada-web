@@ -248,6 +248,24 @@ body {
   padding-top: 30px;
 }
 
+
+/* Estilo para los enlaces de privacidad y copyright en el footer */
+.footer-legal {
+  margin-top: 15px;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.footer-legal a {
+  color: #888;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.footer-legal a:hover {
+  color: #333;
+}
+
 .divider {
   width: 100px;
   height: 1px;

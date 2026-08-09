@@ -37,10 +37,39 @@
       </div>
 
       <!-- Captura de suscriptores -->
-      <form class="newsletter-form" action="https://e39fbd44.sibforms.com/serve/MUIFAKcdCuXxQUpQs9S6d7dZFlfQ8uOSFkO5sOyLy-tfhyDM6UwBA8cQulz_EzkvEJDxNgLiaVmXgC-fjJzD6ffBXzBEDBatxvGtnHlG2vNHnbMKJnUR5YDLIoGv207Dz6o2s7CiRRykT8y25LaezKX9RkJ1JHfCrDufL1JXLmCwMO55fFG__9xne-XIhgudEHtBaBf6f2v2RQ7c9Q==" method="POST" target="_blank">
-        <input type="email" name="EMAIL" placeholder="Recibe mis nuevas publicaciones en tu correo..." required>
+      <form class="newsletter-form" id="newsletterForm"
+        action="https://e39fbd44.sibforms.com/serve/MUIFAKcdCuXxQUpQs9S6d7dZFlfQ8uOSFkO5sOyLy-tfhyDM6UwBA8cQulz_EzkvEJDxNgLiaVmXgC-fjJzD6ffBXzBEDBatxvGtnHlG2vNHnbMKJnUR5YDLIoGv207Dz6o2s7CiRRykT8y25LaezKX9RkJ1JHfCrDufL1JXLmCwMO55fFG__9xne-XIhgudEHtBaBf6f2v2RQ7c9Q=="
+        method="POST">
+        <input type="email" id="newsletterEmail" name="EMAIL"
+          placeholder="Recibe mis nuevas publicaciones en tu correo..." required>
         <button type="submit">Suscribirse</button>
       </form>
+      <p id="newsletterMessage" style="display:none; color: #8c4a4a; margin-top: 10px; font-weight: 500;"></p>
+
+      <script>
+        document.getElementById('newsletterForm').addEventListener('submit', function (e) {
+          e.preventDefault();
+          const form = this;
+          const emailInput = document.getElementById('newsletterEmail');
+          const messageEl = document.getElementById('newsletterMessage');
+
+          fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            mode: 'no-cors'
+          })
+            .then(() => {
+              messageEl.textContent = '¡Gracias por suscribirte!';
+              messageEl.style.display = 'block';
+              emailInput.value = '';
+            })
+            .catch(() => {
+              messageEl.textContent = '¡Gracias por suscribirte!';
+              messageEl.style.display = 'block';
+              emailInput.value = '';
+            });
+        });
+      </script>
     </header>
 
     <div class="paper-edge"></div>
@@ -62,6 +91,11 @@
       <div class="divider"></div>
       <span class="decorator">&#10084;</span>
       <p class="author-credit">Enreve®sada &reg;</p>
+
+      <p class="footer-legal">
+        © 2026 Enreve®sada · <a href="https://www.brevo.com/es/legal/privacypolicy/" target="_blank">Privacidad</a> · <a
+          href="https://www.brevo.com/es/legal/termsofuse/" target="_blank">Aviso legal</a>
+      </p>
     </footer>
 
   </main>
