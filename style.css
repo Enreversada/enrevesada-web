@@ -288,3 +288,43 @@ body {
   margin: 15px auto;
   display: block;
 }
+
+/* Botones de interacción */
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.like-btn {
+  background: transparent;
+  border: 1px solid #d4a3a3;
+  color: #8c4a4a;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.like-btn.liked {
+  background-color: #d4a3a3;
+  color: #fff;
+}
+
+.share-btn {
+  color: #25d366;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid #25d366;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+.comments-section {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px dashed #eee;
+}
