@@ -72,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="comments-dropdown" style="display: none; margin-top: 15px;">
               <p class="comments-title">Comentarios</p>
-              <div class="cusdis-slot"></div>
-            </div>
+              <div class="cusdis-slot" style="min-height: 400px; border: 2px solid red; width: 100%;"></div>
+</div>
           </div>
 
           <button class="toggle-btn">Leer escrito completo</button>
