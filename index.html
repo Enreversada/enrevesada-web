@@ -9,7 +9,9 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500;700&family=Playball&family=Inter:wght@300;400;600&display=swap"
     rel="stylesheet">
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  
+  <!-- Conector Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -18,15 +20,12 @@
     <!-- Cabecera de Portada -->
     <header class="book-header">
       <div class="portada-wrapper">
-        <!-- Añadido id="pre-title" -->
         <p id="pre-title" class="pre-title">"De todas las constelaciones elijo su luz"</p>
 
         <!-- Bloque de título + subtítulo + imagen circular -->
         <div class="brand-header">
-          <!-- Añadido id="profile-avatar" -->
           <img id="profile-avatar" src="autor.jpeg" alt="Foto de Enrevesada" class="profile-avatar">
           <div class="brand-title">
-            <!-- Añadidos id="accent-title" e id="sub-title" -->
             <h1 id="accent-title" class="accent-title">Enreve®sada</h1>
             <p id="sub-title" class="sub-title">Escribo y se me pasa</p>
           </div>
@@ -83,7 +82,7 @@
         </a>
       </h2>
 
-      <!-- Los artículos estáticos se reemplazan por este contenedor para la carga dinámica desde el CMS -->
+      <!-- Contenedor dinámico de escritos cargados desde Supabase -->
       <div id="posts-container"></div>
     </section>
 

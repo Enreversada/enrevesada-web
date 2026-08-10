@@ -1,144 +1,169 @@
-document.addEventListener('DOMContentLoaded', () => {
+const SUPABASE_URL = 'https://fkmkoryqvyobiwlixstx.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_A55H3d-UeWQCgIP6MYgrBw_25qhZneL';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // 1. Cargar Perfil desde la raíz (corrige el error 404 de la consola)
-  fetch('perfil.json')
-    .then(res => res.ok ? res.json() : null)
-    .then(data => {
-      if (data) {
-        if (data.pre_titulo) document.getElementById('pre-title').textContent = data.pre_titulo;
-        if (data.titulo) document.getElementById('accent-title').textContent = data.titulo;
-        if (data.subtitulo) document.getElementById('sub-title').textContent = data.subtitulo;
-        if (data.avatar) {
-          const avatarUrl = data.avatar.startsWith('/') ? data.avatar : '/' + data.avatar;
-          document.getElementById('profile-avatar').src = avatarUrl;
-        }
-      }
-    })
-    .catch(() => console.log('Usando perfil por defecto'));
-
-  // 2. Cargar Escritos desde content/escritos.json
+document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('posts-container');
 
-  fetch('content/escritos.json')
-    .then(res => res.ok ? res.json() : null)
-    .then(data => {
-      if (!data || !data.items) return;
+  // 1. Cargar Escritos desde Supabase
+  const { data: posts, error } = await _supabase.from('escritos').select('*');
 
-      data.items.forEach((post, index) => {
-        const article = document.createElement('article');
-        article.classList.add('post-card');
+  if (error) {
+    console.error('Error al cargar escritos:', error);
+    container.innerHTML = '<p style="text-align:center;">No se pudieron cargar las publicaciones.</p>';
+    return;
+  }
 
-        const lineas = post.contenido.split('\n').filter(p => p.trim() !== '');
-        const htmlContenido = lineas.map(linea => {
-          const textoLimpio = linea.trim();
-          if (textoLimpio.startsWith('images/') || textoLimpio.startsWith('/images/')) {
-            const src = textoLimpio.startsWith('/') ? textoLimpio : '/' + textoLimpio;
-            return `<img src="${src}" alt="Imagen del escrito" class="post-image">`;
-          }
-          return `<p>${textoLimpio}</p>`;
-        }).join('');
+  if (!posts || posts.length === 0) {
+    container.innerHTML = '<p style="text-align:center;">Aún no hay publicaciones creadas en Supabase.</p>';
+    return;
+  }
 
-        const urlWeb = window.location.href;
-        const textoShare = encodeURIComponent(`Lee este escrito: "${post.titulo}"`);
-        const whatsappUrl = `https://api.whatsapp.com/send?text=${textoShare}%20${encodeURIComponent(urlWeb)}`;
+  posts.forEach((post, index) => {
+    const article = document.createElement('article');
+    article.classList.add('post-card');
 
-        // Transforma "Agosto" a "agosto" para coincidir con tu panel de Cusdis
-        const pageId = (post.id || post.titulo).toLowerCase().trim();
+    // Procesar el texto del escrito o imágenes
+    const lineas = (post.contenido || '').split('\n').filter(p => p.trim() !== '');
+    const htmlContenido = lineas.map(linea => {
+      const textoLimpio = linea.trim();
+      if (textoLimpio.startsWith('images/') || textoLimpio.startsWith('/images/')) {
+        const src = textoLimpio.startsWith('/') ? textoLimpio : '/' + textoLimpio;
+        return `<img src="${src}" alt="Imagen del escrito" class="post-image">`;
+      }
+      return `<p>${textoLimpio}</p>`;
+    }).join('');
 
-        article.innerHTML = `
-          <span class="date">${post.fecha}</span>
-          <h3>${post.titulo}</h3>
-          <p class="excerpt">${post.resumen}</p>
-          
-          <div class="post-full" style="display: none;">
-            ${htmlContenido}
-            
-            <div class="post-actions">
-              <div class="left-actions">
-                <button class="icon-btn like-btn" id="like-${index}" title="Me gusta">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                  <span class="like-count">0</span>
-                </button>
+    const urlWeb = window.location.href;
+    const textoShare = encodeURIComponent(`Lee este escrito: "${post.titulo}"`);
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${textoShare}%20${encodeURIComponent(urlWeb)}`;
 
-                <button class="icon-btn comment-toggle-btn" title="Comentar">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                </button>
-              </div>
+    article.innerHTML = `
+      <span class="date">${post.fecha || ''}</span>
+      <h3>${post.titulo || 'Sin título'}</h3>
+      <p class="excerpt">${post.resumen || ''}</p>
+      
+      <div class="post-full" style="display: none;">
+        ${htmlContenido}
+        
+        <div class="post-actions">
+          <div class="left-actions">
+            <button class="icon-btn like-btn" id="like-${index}" title="Me gusta">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              <span class="like-count">0</span>
+            </button>
 
-              <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="share-btn">
-                Compartir
-              </a>
-            </div>
-
-            <div class="comments-dropdown" style="display: none; margin-top: 15px;">
-              <p class="comments-title">Comentarios</p>
-              <div class="cusdis-slot" style="min-height: 400px; border: 2px solid red; width: 100%;"></div>
-</div>
+            <button class="icon-btn comment-toggle-btn" title="Comentar">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            </button>
           </div>
 
-          <button class="toggle-btn">Leer escrito completo</button>
-        `;
+          <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="share-btn">
+            Compartir
+          </a>
+        </div>
 
-        // Lógica de Likes
-        const likeBtn = article.querySelector('.like-btn');
-        const likeCount = article.querySelector('.like-count');
-        let likes = parseInt(localStorage.getItem(`likes_post_${index}`) || '0');
+        <div class="comments-dropdown" style="display: none; margin-top: 15px;">
+          <p class="comments-title" style="font-weight: 600; margin-bottom: 10px;">Comentarios</p>
+          <div class="comments-list" style="margin-bottom: 15px;"></div>
+          
+          <form class="comment-form" style="display: flex; flex-direction: column; gap: 8px;">
+            <input type="text" placeholder="Tu nombre" class="comm-name" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <textarea placeholder="Escribe un comentario..." class="comm-text" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-height: 70px;"></textarea>
+            <button type="submit" style="padding: 8px 15px; cursor: pointer; align-self: flex-start; background: #333; color: #fff; border: none; border-radius: 4px;">Enviar comentario</button>
+            <p class="comm-msg" style="font-size: 0.85em; color: green; display: none; margin-top: 5px;">¡Enviado! Pendiente de aprobación.</p>
+          </form>
+        </div>
+      </div>
+
+      <button class="toggle-btn">Leer escrito completo</button>
+    `;
+
+    // Lógica de Likes
+    const likeBtn = article.querySelector('.like-btn');
+    const likeCount = article.querySelector('.like-count');
+    let likes = parseInt(localStorage.getItem(`likes_post_${post.id || index}`) || '0');
+    likeCount.textContent = likes;
+
+    likeBtn.addEventListener('click', () => {
+      if (!likeBtn.classList.contains('liked')) {
+        likes++;
         likeCount.textContent = likes;
+        localStorage.setItem(`likes_post_${post.id || index}`, likes);
+        likeBtn.classList.add('liked');
+      }
+    });
 
-        likeBtn.addEventListener('click', () => {
-          if (!likeBtn.classList.contains('liked')) {
-            likes++;
-            likeCount.textContent = likes;
-            localStorage.setItem(`likes_post_${index}`, likes);
-            likeBtn.classList.add('liked');
-          }
-        });
+    // Desplegable de comentarios con consulta a Supabase
+    const commentBtn = article.querySelector('.comment-toggle-btn');
+    const commentsDropdown = article.querySelector('.comments-dropdown');
+    const commentsList = article.querySelector('.comments-list');
+    const commentForm = article.querySelector('.comment-form');
 
-        // Desplegable de comentarios (Inyección bajo demanda)
-        const commentBtn = article.querySelector('.comment-toggle-btn');
-        const commentsDropdown = article.querySelector('.comments-dropdown');
-        const cusdisSlot = article.querySelector('.cusdis-slot');
+    commentBtn.addEventListener('click', async () => {
+      const isHidden = commentsDropdown.style.display === 'none';
+      commentsDropdown.style.display = isHidden ? 'block' : 'none';
 
-        commentBtn.addEventListener('click', () => {
-          const isHidden = commentsDropdown.style.display === 'none';
+      if (isHidden) {
+        commentsList.innerHTML = '<p style="color: #888; font-size: 0.85em;">Cargando comentarios...</p>';
+        
+        // Obtener comentarios APROBADOS desde Supabase
+        const { data: comments } = await _supabase
+          .from('comentarios')
+          .select('*')
+          .eq('escrito_id', post.id)
+          .eq('aprobado', true);
 
-          if (isHidden) {
-            commentsDropdown.style.display = 'block';
+        if (comments && comments.length > 0) {
+          commentsList.innerHTML = comments.map(c => `
+            <div style="background: rgba(0,0,0,0.03); padding: 10px; border-radius: 6px; margin-bottom: 8px; text-align: left;">
+              <strong style="font-size: 0.9em; color: #333;">${c.nombre}</strong>
+              <p style="margin: 4px 0 0 0; font-size: 0.9em;">${c.texto}</p>
+            </div>
+          `).join('');
+        } else {
+          commentsList.innerHTML = '<p style="color: #777; font-size: 0.85em;">No hay comentarios aún.</p>';
+        }
+      }
+    });
 
-            if (!cusdisSlot.querySelector('iframe')) {
-              const appId = '60f733d0-c006-4fef-845a-e66e26f4ff77';
-              const iframeSrc = `https://cusdis.com/api/open/html?app_id=${appId}&page_id=${encodeURIComponent(pageId)}&page_url=${encodeURIComponent(urlWeb)}&page_title=${encodeURIComponent(post.titulo)}&lang=es`;
+    // Enviar nuevo comentario a Supabase
+    commentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nombreInput = article.querySelector('.comm-name');
+      const textoInput = article.querySelector('.comm-text');
 
-              const iframe = document.createElement('iframe');
-              iframe.src = iframeSrc;
-              iframe.style.width = '100%';
-              iframe.style.height = '480px';
-              iframe.style.border = 'none';
-              iframe.style.display = 'block';
+      const { error: insertError } = await _supabase.from('comentarios').insert([
+        { 
+          escrito_id: post.id, 
+          nombre: nombreInput.value, 
+          texto: textoInput.value, 
+          aprobado: false 
+        }
+      ]);
 
-              cusdisSlot.appendChild(iframe);
-            }
-          } else {
-            commentsDropdown.style.display = 'none';
-          }
-        });
+      if (!insertError) {
+        commentForm.reset();
+        article.querySelector('.comm-msg').style.display = 'block';
+      } else {
+        alert('Hubo un error al enviar el comentario.');
+      }
+    });
 
-        // Toggle escrito completo
-        const btn = article.querySelector('.toggle-btn');
-        const postFull = article.querySelector('.post-full');
+    // Toggle para desplegar escrito completo
+    const btn = article.querySelector('.toggle-btn');
+    const postFull = article.querySelector('.post-full');
 
-        btn.addEventListener('click', () => {
-          if (postFull.style.display === 'block') {
-            postFull.style.display = 'none';
-            btn.textContent = 'Leer escrito completo';
-          } else {
-            postFull.style.display = 'block';
-            btn.textContent = 'Leer menos';
-          }
-        });
+    btn.addEventListener('click', () => {
+      if (postFull.style.display === 'block') {
+        postFull.style.display = 'none';
+        btn.textContent = 'Leer escrito completo';
+      } else {
+        postFull.style.display = 'block';
+        btn.textContent = 'Leer menos';
+      }
+    });
 
-        container.appendChild(article);
-      });
-    })
-    .catch(() => console.log('Esperando publicaciones...'));
+    container.appendChild(article);
+  });
 });
