@@ -23,15 +23,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const article = document.createElement('article');
     article.classList.add('post-card');
 
-    // Procesar el texto del escrito o imágenes
+    // Procesar el texto del escrito o imágenes (URLs web o carpetas locales)
     const lineas = (post.contenido || '').split('\n').filter(p => p.trim() !== '');
     const htmlContenido = lineas.map(linea => {
-      const textoLimpio = linea.trim();
-      if (textoLimpio.startsWith('images/') || textoLimpio.startsWith('/images/')) {
-        const src = textoLimpio.startsWith('/') ? textoLimpio : '/' + textoLimpio;
-        return `<img src="${src}" alt="Imagen del escrito" class="post-image">`;
+      const t = linea.trim();
+      const esImagenUrl = t.startsWith('http://') || t.startsWith('https://');
+      const esImagenLocal = t.startsWith('images/') || t.startsWith('/images/');
+
+      if (esImagenUrl || esImagenLocal) {
+        const src = esImagenLocal && !t.startsWith('/') ? '/' + t : t;
+        return `<img src="${src}" alt="Imagen del escrito" class="post-image" style="max-width:100%; height:auto; display:block; margin: 15px auto; border-radius: 8px;">`;
       }
-      return `<p>${textoLimpio}</p>`;
+      return `<p>${t}</p>`;
     }).join('');
 
     const urlWeb = window.location.href;
