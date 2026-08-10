@@ -19,11 +19,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  posts.forEach((post, index) => {
+  for (const [index, post] of posts.entries()) {
     const article = document.createElement('article');
     article.classList.add('post-card');
 
-    // Procesar el texto del escrito o imágenes (URLs web o carpetas locales)
+    // Procesar el texto del escrito o imágenes
     const lineas = (post.contenido || '').split('\n').filter(p => p.trim() !== '');
     const htmlContenido = lineas.map(linea => {
       const t = linea.trim();
@@ -40,6 +40,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const urlWeb = window.location.href;
     const textoShare = encodeURIComponent(`Lee este escrito: "${post.titulo}"`);
     const whatsappUrl = `https://api.whatsapp.com/send?text=${textoShare}%20${encodeURIComponent(urlWeb)}`;
+
+    // Contar comentarios aprobados para este escrito
+    const { count: commentCount } = await _supabase
+      .from('comentarios')
+      .select('*', { count: 'exact', head: true })
+      .eq('escrito_id', post.id)
+      .eq('aprobado', true);
 
     article.innerHTML = `
       <span class="date">${post.fecha || ''}</span>
@@ -58,6 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             <button class="icon-btn comment-toggle-btn" title="Comentar">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+              <span class="comment-count">${commentCount || 0}</span>
             </button>
           </div>
 
@@ -97,11 +105,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    // Desplegable de comentarios con consulta a Supabase
+    // Desplegable de comentarios
     const commentBtn = article.querySelector('.comment-toggle-btn');
     const commentsDropdown = article.querySelector('.comments-dropdown');
     const commentsList = article.querySelector('.comments-list');
     const commentForm = article.querySelector('.comment-form');
+    const commentCountSpan = article.querySelector('.comment-count');
 
     commentBtn.addEventListener('click', async () => {
       const isHidden = commentsDropdown.style.display === 'none';
@@ -110,7 +119,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (isHidden) {
         commentsList.innerHTML = '<p style="color: #888; font-size: 0.85em;">Cargando comentarios...</p>';
         
-        // Obtener comentarios APROBADOS desde Supabase
         const { data: comments } = await _supabase
           .from('comentarios')
           .select('*')
@@ -118,6 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           .eq('aprobado', true);
 
         if (comments && comments.length > 0) {
+          commentCountSpan.textContent = comments.length;
           commentsList.innerHTML = comments.map(c => `
             <div style="background: rgba(0,0,0,0.03); padding: 10px; border-radius: 6px; margin-bottom: 8px; text-align: left;">
               <strong style="font-size: 0.9em; color: #333;">${c.nombre}</strong>
@@ -125,6 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
           `).join('');
         } else {
+          commentCountSpan.textContent = 0;
           commentsList.innerHTML = '<p style="color: #777; font-size: 0.85em;">No hay comentarios aún.</p>';
         }
       }
@@ -168,5 +178,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     container.appendChild(article);
-  });
+  }
 });
