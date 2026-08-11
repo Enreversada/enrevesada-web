@@ -48,6 +48,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       .eq('escrito_id', post.id)
       .eq('aprobado', true);
 
+    const initialLikes = post.likes || 0;
+
     article.innerHTML = `
       <span class="date">${post.fecha || ''}</span>
       <h3>${post.titulo || 'Sin título'}</h3>
@@ -58,9 +60,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         <div class="post-actions">
           <div class="left-actions">
-            <button class="icon-btn like-btn" id="like-${index}" title="Me gusta">
+            <button class="icon-btn like-btn" id="like-${post.id || index}" title="Me gusta">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-              <span class="like-count">0</span>
+              <span class="like-count">${initialLikes}</span>
             </button>
 
             <button class="icon-btn comment-toggle-btn" title="Comentar">
@@ -90,18 +92,33 @@ document.addEventListener('DOMContentLoaded', async () => {
       <button class="toggle-btn">Leer escrito completo</button>
     `;
 
-    // Lógica de Likes
+    // Lógica de Likes Globales (Supabase + localStorage anti-spam)
     const likeBtn = article.querySelector('.like-btn');
-    const likeCount = article.querySelector('.like-count');
-    let likes = parseInt(localStorage.getItem(`likes_post_${post.id || index}`) || '0');
-    likeCount.textContent = likes;
+    const likeCountSpan = article.querySelector('.like-count');
+    const hasLiked = localStorage.getItem(`liked_post_${post.id}`);
 
-    likeBtn.addEventListener('click', () => {
-      if (!likeBtn.classList.contains('liked')) {
-        likes++;
-        likeCount.textContent = likes;
-        localStorage.setItem(`likes_post_${post.id || index}`, likes);
+    if (hasLiked) {
+      likeBtn.classList.add('liked');
+    }
+
+    let currentLikes = initialLikes;
+
+    likeBtn.addEventListener('click', async () => {
+      if (!localStorage.getItem(`liked_post_${post.id}`)) {
+        currentLikes++;
+        likeCountSpan.textContent = currentLikes;
         likeBtn.classList.add('liked');
+        localStorage.setItem(`liked_post_${post.id}`, 'true');
+
+        // Actualizar en Supabase para todos
+        const { error: updateError } = await _supabase
+          .from('escritos')
+          .update({ likes: currentLikes })
+          .eq('id', post.id);
+
+        if (updateError) {
+          console.error('Error al actualizar like en Supabase:', updateError);
+        }
       }
     });
 
