@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const article = document.createElement('article');
     article.classList.add('post-card');
 
-    // Procesar el texto del escrito o imágenes
+    // Procesar contenido (texto e imágenes)
     const lineas = (post.contenido || '').split('\n').filter(p => p.trim() !== '');
     const htmlContenido = lineas.map(linea => {
       const t = linea.trim();
@@ -41,14 +41,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const textoShare = encodeURIComponent(`Lee este escrito: "${post.titulo}"`);
     const whatsappUrl = `https://api.whatsapp.com/send?text=${textoShare}%20${encodeURIComponent(urlWeb)}`;
 
-    // Contar comentarios aprobados para este escrito
+    // Contar comentarios aprobados
     const { count: commentCount } = await _supabase
       .from('comentarios')
       .select('*', { count: 'exact', head: true })
       .eq('escrito_id', post.id)
       .eq('aprobado', true);
 
-    const initialLikes = post.likes || 0;
+    const initialLikes = Number(post.likes) || 0;
 
     article.innerHTML = `
       <span class="date">${post.fecha || ''}</span>
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         <div class="post-actions">
           <div class="left-actions">
-            <button class="icon-btn like-btn" id="like-${post.id || index}" title="Me gusta">
+            <button class="icon-btn like-btn" title="Me gusta">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
               <span class="like-count">${initialLikes}</span>
             </button>
@@ -92,33 +92,31 @@ document.addEventListener('DOMContentLoaded', async () => {
       <button class="toggle-btn">Leer escrito completo</button>
     `;
 
-    // Lógica de Likes Globales (Supabase + localStorage anti-spam)
+    // Lógica de Likes
     const likeBtn = article.querySelector('.like-btn');
     const likeCountSpan = article.querySelector('.like-count');
-    const hasLiked = localStorage.getItem(`liked_post_${post.id}`);
-
-    if (hasLiked) {
+    const storageKey = `liked_post_${post.id}`;
+    
+    if (localStorage.getItem(storageKey) === 'true') {
       likeBtn.classList.add('liked');
     }
 
     let currentLikes = initialLikes;
 
     likeBtn.addEventListener('click', async () => {
-      if (!localStorage.getItem(`liked_post_${post.id}`)) {
-        currentLikes++;
-        likeCountSpan.textContent = currentLikes;
-        likeBtn.classList.add('liked');
-        localStorage.setItem(`liked_post_${post.id}`, 'true');
+      if (localStorage.getItem(storageKey) === 'true') {
+        return;
+      }
 
-        // Actualizar en Supabase para todos
-        const { error: updateError } = await _supabase
-          .from('escritos')
-          .update({ likes: currentLikes })
-          .eq('id', post.id);
+      localStorage.setItem(storageKey, 'true');
+      likeBtn.classList.add('liked');
+      currentLikes++;
+      likeCountSpan.textContent = currentLikes;
 
-        if (updateError) {
-          console.error('Error al actualizar like en Supabase:', updateError);
-        }
+      const { error: rpcError } = await _supabase.rpc('incrementar_like', { post_id: post.id });
+
+      if (rpcError) {
+        await _supabase.from('escritos').update({ likes: currentLikes }).eq('id', post.id);
       }
     });
 
@@ -157,7 +155,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    // Enviar nuevo comentario a Supabase
+    // Enviar comentario
     commentForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const nombreInput = article.querySelector('.comm-name');
@@ -180,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    // Toggle para desplegar escrito completo
+    // Desplegar escrito
     const btn = article.querySelector('.toggle-btn');
     const postFull = article.querySelector('.post-full');
 
