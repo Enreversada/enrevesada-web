@@ -19,14 +19,14 @@
     }
     .container {
       width: 100%;
-      max-width: 720px;
+      max-width: 760px;
       background: #ffffff;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     }
     h1 { font-size: 1.6rem; margin-bottom: 20px; color: #111; }
-    h2 { font-size: 1.2rem; margin: 30px 0 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+    h2 { font-size: 1.2rem; margin: 35px 0 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
     
     .form-group { margin-bottom: 18px; }
     label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }
@@ -41,7 +41,7 @@
       transition: border-color 0.2s;
     }
     input:focus, textarea:focus { border-color: #333; }
-    textarea { min-height: 220px; resize: vertical; line-height: 1.5; }
+    textarea { min-height: 200px; resize: vertical; line-height: 1.5; }
     
     button.btn-primary {
       background: #111;
@@ -66,7 +66,29 @@
     .status-msg.success { background: #e6f7ec; color: #0d6832; }
     .status-msg.error { background: #fde8e8; color: #9b1c1c; }
 
-    /* Bloque de comentarios pendientes */
+    /* Pestañas de moderación */
+    .tabs-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .tab-btn {
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      background: #f8f9fa;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+
+    /* Tarjetas de Comentarios */
     .comment-card {
       background: #fdfdfd;
       border: 1px solid #eaeaea;
@@ -81,11 +103,13 @@
     .comment-info strong { display: block; font-size: 0.95rem; color: #111; }
     .comment-info p { font-size: 0.85rem; color: #555; margin-top: 4px; }
     .comment-info small { color: #888; font-size: 0.75rem; }
-    .comment-actions { display: flex; gap: 8px; }
-    .btn-approve { background: #2e7d32; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-    .btn-delete { background: #d32f2f; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+    
+    .comment-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-approve { background: #2e7d32; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+    .btn-hide { background: #f57c00; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+    .btn-delete { background: #d32f2f; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
 
-    /* Modal de PIN */
+    /* Modal PIN */
     #lock-screen {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: #ffffff; display: flex; align-items: center; justify-content: center;
@@ -107,12 +131,14 @@
   </div>
 
   <div class="container" id="admin-panel" style="display: none;">
-    <h1>Panel de Escritora</h1>
+    <h1>Panel de Gestión</h1>
 
     <!-- Formulario para publicar nuevo escrito -->
     <form id="post-form">
+      <h2>Publicar nuevo escrito</h2>
+      
       <div class="form-group">
-        <label for="titulo">Título del escrito</label>
+        <label for="titulo">Título</label>
         <input type="text" id="titulo" placeholder="Ej: Las noches en calma" required>
       </div>
 
@@ -123,44 +149,48 @@
 
       <div class="form-group">
         <label for="resumen">Resumen / Extracto</label>
-        <input type="text" id="resumen" placeholder="Breve frase que engancha al lector..." required>
+        <input type="text" id="resumen" placeholder="Breve frase para la vista previa..." required>
       </div>
 
       <div class="form-group">
         <label for="contenido">Contenido completo</label>
-        <textarea id="contenido" placeholder="Escribe el texto aquí. Los saltos de línea se respetarán automáticamente..." required></textarea>
+        <textarea id="contenido" placeholder="Escribe el texto aquí. Los saltos de línea se respetarán en la web..." required></textarea>
       </div>
 
-      <button type="submit" class="btn-primary">Publicar en la web</button>
+      <button type="submit" class="btn-primary">Publicar escrito</button>
       <div id="status" class="status-msg"></div>
     </form>
 
-    <!-- Sección de moderación de comentarios -->
-    <h2>Moderar comentarios pendientes</h2>
-    <div id="pending-comments">Cargando comentarios...</div>
+    <!-- Sección de gestión de comentarios -->
+    <h2>Gestión de comentarios</h2>
+    <div class="tabs-nav">
+      <button class="tab-btn active" id="tab-pending" onclick="cambiarPestaña(false)">Pendientes</button>
+      <button class="tab-btn" id="tab-approved" onclick="cambiarPestaña(true)">Publicados (Aprobados)</button>
+    </div>
+
+    <div id="comments-container">Cargando comentarios...</div>
   </div>
 
   <script>
-    // Configuración Supabase
     const SUPABASE_URL = 'https://fkmkoryqvyobiwlixstx.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_A55H3d-UeWQCgIP6MYgrBw_25qhZneL';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Contraseña de acceso (puedes cambiar '1234' por la clave que quieras darle)
     const CLAVE_SECRETA = '1234';
+    let estadoFiltroActual = false; // false = pendientes, true = aprobados
 
     function verificarPin() {
       const pin = document.getElementById('pin-input').value;
       if (pin === CLAVE_SECRETA) {
         document.getElementById('lock-screen').style.display = 'none';
         document.getElementById('admin-panel').style.display = 'block';
-        cargarComentariosPendientes();
+        cargarComentarios(estadoFiltroActual);
       } else {
         document.getElementById('pin-error').style.display = 'block';
       }
     }
 
-    // Poner fecha sugerida automáticamente
+    // Fecha actual predeterminada
     const hoy = new Date();
     const opcionesFecha = { day: 'numeric', month: 'long', year: 'numeric' };
     document.getElementById('fecha').value = hoy.toLocaleDateString('es-ES', opcionesFecha);
@@ -176,7 +206,7 @@
       const resumen = document.getElementById('resumen').value.trim();
       const contenido = document.getElementById('contenido').value.trim();
 
-      const { data, error } = await _supabase.from('escritos').insert([
+      const { error } = await _supabase.from('escritos').insert([
         { titulo, fecha, resumen, contenido, likes: 0 }
       ]);
 
@@ -193,17 +223,27 @@
       }
     });
 
-    // 2. Cargar y moderar comentarios pendientes
-    async function cargarComentariosPendientes() {
-      const container = document.getElementById('pending-comments');
-      
+    // 2. Navegación entre pestañas de comentarios
+    function cambiarPestaña(esAprobado) {
+      estadoFiltroActual = esAprobado;
+      document.getElementById('tab-pending').classList.toggle('active', !esAprobado);
+      document.getElementById('tab-approved').classList.toggle('active', esAprobado);
+      cargarComentarios(esAprobado);
+    }
+
+    // 3. Cargar comentarios según estado
+    async function cargarComentarios(esAprobado) {
+      const container = document.getElementById('comments-container');
+      container.innerHTML = '<p style="color:#777; font-size:0.9rem;">Cargando comentarios...</p>';
+
       const { data: comments, error } = await _supabase
         .from('comentarios')
         .select('*')
-        .eq('aprobado', false);
+        .eq('aprobado', esAprobado)
+        .order('id', { ascending: false });
 
       if (error || !comments || comments.length === 0) {
-        container.innerHTML = '<p style="color:#777; font-size:0.9rem;">No hay comentarios pendientes de aprobación.</p>';
+        container.innerHTML = `<p style="color:#777; font-size:0.9rem;">No hay comentarios en esta sección.</p>`;
         return;
       }
 
@@ -212,40 +252,42 @@
           <div class="comment-info">
             <strong>${c.nombre}</strong>
             <p>${c.texto}</p>
-            <small>ID Escrito asociado: ${c.escrito_id}</small>
+            <small>Escrito ID: ${c.escrito_id}</small>
           </div>
           <div class="comment-actions">
-            <button class="btn-approve" onclick="aprobarComentario(${c.id})">Aprobar</button>
+            ${
+              !esAprobado 
+                ? `<button class="btn-approve" onclick="cambiarEstadoComentario(${c.id}, true)">Aprobar</button>` 
+                : `<button class="btn-hide" onclick="cambiarEstadoComentario(${c.id}, false)">Ocultar</button>`
+            }
             <button class="btn-delete" onclick="eliminarComentario(${c.id})">Borrar</button>
           </div>
         </div>
       `).join('');
     }
 
-    async function aprobarComentario(id) {
+    // 4. Cambiar estado (Aprobar u Ocultar)
+    async function cambiarEstadoComentario(id, nuevoEstado) {
       const { error } = await _supabase
         .from('comentarios')
-        .update({ aprobado: true })
+        .update({ aprobado: nuevoEstado })
         .eq('id', id);
 
       if (!error) {
-        const el = document.getElementById(`comm-${id}`);
-        if (el) el.remove();
-        cargarComentariosPendientes();
+        cargarComentarios(estadoFiltroActual);
       }
     }
 
+    // 5. Eliminar comentario
     async function eliminarComentario(id) {
-      if (!confirm('¿Eliminar este comentario permanentemente?')) return;
+      if (!confirm('¿Seguro que deseas eliminar este comentario?')) return;
       const { error } = await _supabase
         .from('comentarios')
         .delete()
         .eq('id', id);
 
       if (!error) {
-        const el = document.getElementById(`comm-${id}`);
-        if (el) el.remove();
-        cargarComentariosPendientes();
+        cargarComentarios(estadoFiltroActual);
       }
     }
   </script>
