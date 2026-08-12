@@ -36,7 +36,7 @@
     
     .form-group { margin-bottom: 18px; }
     label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }
-    input[type="text"], input[type="email"], input[type="password"], textarea {
+    input[type="text"], input[type="email"], input[type="password"], textarea, input[type="file"] {
       width: 100%;
       padding: 12px;
       border: 1px solid #ddd;
@@ -57,6 +57,7 @@
       border-radius: 8px;
       cursor: pointer;
     }
+    button.btn-primary:disabled { background: #888; cursor: not-allowed; }
     button.btn-logout {
       background: #eee;
       color: #333;
@@ -126,17 +127,17 @@
 </head>
 <body>
 
-  <!-- Pantalla de Inicio de Sesión Oficial -->
+  <!-- Pantalla de Login -->
   <div id="login-screen">
     <div class="login-box">
       <h2 style="margin-top:0; margin-bottom:15px; text-align:center;">Iniciar Sesión</h2>
       <form id="login-form">
         <div class="form-group">
-          <label for="email">Correo electrónico</label>
+          <label for="login-email">Correo electrónico</label>
           <input type="email" id="login-email" required placeholder="tucorreo@ejemplo.com">
         </div>
         <div class="form-group">
-          <label for="password">Contraseña</label>
+          <label for="login-password">Contraseña</label>
           <input type="password" id="login-password" required placeholder="••••••••">
         </div>
         <button type="submit" class="btn-primary" style="width: 100%;">Entrar al panel</button>
@@ -145,7 +146,7 @@
     </div>
   </div>
 
-  <!-- Panel de Control Principal -->
+  <!-- Panel Principal -->
   <div class="container" id="admin-panel" style="display: none;">
     <div class="header-bar">
       <h1>Panel de Escritora</h1>
@@ -172,11 +173,17 @@
       </div>
 
       <div class="form-group">
+        <label for="imagen">Imagen (Opcional)</label>
+        <input type="file" id="imagen" accept="image/*">
+        <small style="color: #666; font-size: 0.8rem; display:block; margin-top: 4px;">Puedes seleccionar una imagen en formato JPG, PNG o WebP.</small>
+      </div>
+
+      <div class="form-group">
         <label for="contenido">Contenido completo</label>
         <textarea id="contenido" placeholder="Escribe aquí el texto..." required></textarea>
       </div>
 
-      <button type="submit" class="btn-primary">Publicar escrito</button>
+      <button type="submit" id="btn-submit" class="btn-primary">Publicar escrito</button>
       <div id="status" class="status-msg"></div>
     </form>
 
@@ -197,7 +204,6 @@
 
     let estadoFiltroActual = false;
 
-    // Verificar si ya hay una sesión activa guardada
     async function chequearSesion() {
       const { data: { session } } = await _supabase.auth.getSession();
       if (session) {
@@ -217,7 +223,6 @@
       cargarComentarios(estadoFiltroActual);
     }
 
-    // Login con Supabase Auth
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email').value;
@@ -225,8 +230,7 @@
       const errorMsg = document.getElementById('login-error');
       errorMsg.style.display = 'none';
 
-      const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-
+      const { error } = await _supabase.auth.signInWithPassword({ email, password });
       if (error) {
         errorMsg.textContent = 'Credenciales incorrectas: ' + error.message;
         errorMsg.style.display = 'block';
@@ -235,36 +239,72 @@
       }
     });
 
-    // Cerrar sesión
     async function cerrarSesion() {
       await _supabase.auth.signOut();
       window.location.reload();
     }
 
-    // Publicar escrito
+    // Publicar escrito con imagen
     document.getElementById('post-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const btnSubmit = document.getElementById('btn-submit');
       const status = document.getElementById('status');
+      
       status.style.display = 'none';
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = 'Subiendo y publicando...';
 
       const titulo = document.getElementById('titulo').value.trim();
       const fecha = document.getElementById('fecha').value.trim();
       const resumen = document.getElementById('resumen').value.trim();
-      const contenido = document.getElementById('contenido').value.trim();
+      let contenido = document.getElementById('contenido').value.trim();
+      const fileInput = document.getElementById('imagen');
 
-      const { error } = await _supabase.from('escritos').insert([
-        { titulo, fecha, resumen, contenido, likes: 0 }
-      ]);
+      try {
+        // Si hay una imagen seleccionada, subirla al Bucket
+        if (fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
 
-      if (error) {
-        status.textContent = 'Error al publicar: ' + error.message;
-        status.className = 'status-msg error';
-        status.style.display = 'block';
-      } else {
-        status.textContent = '¡Escrito publicado con éxito en la web!';
+          const { data: uploadData, error: uploadError } = await _supabase.storage
+            .from('imagenes')
+            .upload(fileName, file);
+
+          if (uploadError) {
+            throw new Error('Error al subir la imagen: ' + uploadError.message);
+          }
+
+          // Obtener la URL pública de la imagen subida
+          const { data: urlData } = _supabase.storage
+            .from('imagenes')
+            .getPublicUrl(fileName);
+
+          // Insertamos la URL de la imagen al inicio del contenido
+          contenido = `${urlData.publicUrl}\n\n${contenido}`;
+        }
+
+        // Insertar en la base de datos
+        const { error: insertError } = await _supabase.from('escritos').insert([
+          { titulo, fecha, resumen, contenido, likes: 0 }
+        ]);
+
+        if (insertError) {
+          throw new Error('Error al guardar el escrito: ' + insertError.message);
+        }
+
+        status.textContent = '¡Escrito e imagen publicados con éxito en la web!';
         status.className = 'status-msg success';
         status.style.display = 'block';
         document.getElementById('post-form').reset();
+
+      } catch (err) {
+        status.textContent = err.message;
+        status.className = 'status-msg error';
+        status.style.display = 'block';
+      } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Publicar escrito';
       }
     });
 
