@@ -182,6 +182,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btn = article.querySelector('.toggle-btn');
     const postFull = article.querySelector('.post-full');
 
+    let yaContado = false; // Para contar solo 1 vez por sesión si abre/cierra
+
     btn.addEventListener('click', () => {
       if (postFull.style.display === 'block') {
         postFull.style.display = 'none';
@@ -189,6 +191,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         postFull.style.display = 'block';
         btn.textContent = 'Leer menos';
+
+        // Sumar lectura solo la primera vez que despliega el texto
+        if (!yaContado) {
+          yaContado = true;
+          await _supabase.rpc('incrementar_vista', { post_id: post.id });
+        }
       }
     });
 
