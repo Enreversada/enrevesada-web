@@ -1,74 +1,208 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Administración | Enrevesada</title>
+  <title>Escritorio de Autora | Enreve®sada</title>
+
+  <!-- Fuentes de Google coincidentes con la web -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Playball&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #f8f9fa;
-      color: #2b2b2b;
-      padding: 30px 15px;
+      font-family: 'Inter', sans-serif;
+      background-color: #f7f4f0; /* Fondo cálido estilo papel */
+      color: #333333;
+      padding: 40px 15px;
       display: flex;
       justify-content: center;
+      min-height: 100vh;
     }
+
     .container {
       width: 100%;
       max-width: 820px;
       background: #ffffff;
-      padding: 30px;
+      padding: 40px;
       border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      border: 1px solid #eae3db;
     }
+
+    /* Encabezado Editorial */
+    .brand-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .brand-title {
+      font-family: 'Playball', cursive;
+      font-size: 2.8rem;
+      color: #7a3232; /* Tono burdeos cálido */
+      font-weight: normal;
+    }
+
+    .sub-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.2rem;
+      color: #666;
+      margin-top: -5px;
+    }
+
     .header-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding-bottom: 15px;
+      border-bottom: 1px dashed #d8cebe;
       margin-bottom: 25px;
     }
-    h1 { font-size: 1.5rem; color: #111; }
-    h2 { font-size: 1.2rem; margin: 30px 0 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-    
-    .form-group { margin-bottom: 18px; }
-    label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }
-    input[type="text"], input[type="email"], input[type="password"], textarea, input[type="file"] {
+
+    .header-bar h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      color: #2c2c2c;
+    }
+
+    .btn-logout {
+      background: transparent;
+      color: #8c4a4a;
+      border: 1px solid #8c4a4a;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-logout:hover {
+      background: #8c4a4a;
+      color: #fff;
+    }
+
+    /* Selector Modular / Pestañas principales */
+    .section-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+      background: #fbf9f6;
+      padding: 6px;
+      border-radius: 10px;
+      border: 1px solid #eae3db;
+    }
+
+    .selector-btn {
+      flex: 1;
+      padding: 10px 14px;
+      border: none;
+      background: transparent;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #666;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .selector-btn.active {
+      background: #ffffff;
+      color: #7a3232;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Módulos de contenido */
+    .admin-section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .admin-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Formulario */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea,
+    input[type="file"] {
       width: 100%;
       padding: 12px;
-      border: 1px solid #ddd;
+      border: 1px solid #dfd8ce;
       border-radius: 8px;
       font-size: 0.95rem;
       font-family: inherit;
+      background-color: #faf8f5;
       outline: none;
+      transition: border-color 0.2s ease;
     }
-    textarea { min-height: 180px; resize: vertical; line-height: 1.5; }
-    
+
+    input:focus, textarea:focus {
+      border-color: #7a3232;
+      background-color: #fff;
+    }
+
+    textarea {
+      min-height: 200px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
     button.btn-primary {
-      background: #111;
+      background: #7a3232;
       color: #fff;
       border: none;
-      padding: 12px 24px;
+      padding: 12px 28px;
       font-size: 0.95rem;
-      font-weight: 600;
-      border-radius: 8px;
+      font-weight: 500;
+      border-radius: 25px;
       cursor: pointer;
+      transition: background 0.2s ease;
     }
-    button.btn-primary:disabled { background: #888; cursor: not-allowed; }
-    button.btn-logout {
-      background: #eee;
-      color: #333;
-      border: none;
-      padding: 8px 14px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
+
+    button.btn-primary:hover {
+      background: #5c2424;
     }
-    
+
+    button.btn-primary:disabled {
+      background: #bfa5a5;
+      cursor: not-allowed;
+    }
+
     .status-msg {
       margin-top: 15px;
       padding: 12px;
@@ -76,151 +210,214 @@
       font-size: 0.9rem;
       display: none;
     }
-    .status-msg.success { background: #e6f7ec; color: #0d6832; }
-    .status-msg.error { background: #fde8e8; color: #9b1c1c; }
 
-    .tabs-nav { display: flex; gap: 10px; margin-bottom: 15px; }
-    .tab-btn {
-      padding: 8px 16px;
-      border: 1px solid #ddd;
-      background: #f8f9fa;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.85rem;
-    }
-    .tab-btn.active { background: #111; color: #fff; border-color: #111; }
+    .status-msg.success { background: #eaf5ed; color: #1e6b37; }
+    .status-msg.error { background: #fcebeb; color: #a12b2b; }
 
-    /* Estilos para la tabla de métricas de escritos */
+    /* Tablas y Métricas */
     .stats-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
     }
+
     .stats-table th, .stats-table td {
       text-align: left;
       padding: 12px;
       border-bottom: 1px solid #eee;
       font-size: 0.9rem;
     }
-    .stats-table th { background: #f8f9fa; font-weight: 600; color: #444; }
+
+    .stats-table th {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      background: #faf8f5;
+      color: #555;
+    }
+
     .badge {
       display: inline-block;
-      padding: 4px 8px;
+      padding: 4px 10px;
       border-radius: 12px;
-      font-weight: 600;
+      font-weight: 500;
       font-size: 0.8rem;
     }
-    .badge-views { background: #e3f2fd; color: #0d47a1; }
-    .badge-likes { background: #fbe9e7; color: #c62828; }
+
+    .badge-views { background: #f0f4f8; color: #2c5282; }
+    .badge-likes { background: #fdf2f2; color: #9b2c2c; }
+
+    /* Comentarios */
+    .tabs-subnav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .subtab-btn {
+      padding: 6px 14px;
+      border: 1px solid #dfd8ce;
+      background: #faf8f5;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .subtab-btn.active {
+      background: #7a3232;
+      color: #fff;
+      border-color: #7a3232;
+    }
 
     .comment-card {
-      background: #fdfdfd;
-      border: 1px solid #eaeaea;
-      padding: 15px;
-      border-radius: 8px;
+      background: #faf8f5;
+      border: 1px solid #eae3db;
+      padding: 16px;
+      border-radius: 10px;
       margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 15px;
     }
-    .comment-info strong { display: block; font-size: 0.95rem; color: #111; }
-    .comment-info p { font-size: 0.85rem; color: #555; margin-top: 4px; }
-    .comment-info small { color: #888; font-size: 0.75rem; }
-    .comment-actions { display: flex; gap: 8px; flex-shrink: 0; }
-    .btn-approve { background: #2e7d32; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-    .btn-hide { background: #f57c00; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-    .btn-delete { background: #d32f2f; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
 
+    .comment-info strong {
+      display: block;
+      font-size: 0.95rem;
+      color: #2c2c2c;
+    }
+
+    .comment-info p {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    .comment-info small {
+      color: #888;
+      font-size: 0.75rem;
+    }
+
+    .comment-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-approve { background: #2e7d32; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+    .btn-hide { background: #f57c00; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+    .btn-delete { background: #c62828; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+
+    /* Login Screen */
     #login-screen {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: #f8f9fa; display: flex; align-items: center; justify-content: center;
+      background: #f7f4f0; display: flex; align-items: center; justify-content: center;
       z-index: 999;
     }
+
     .login-box {
       background: #fff;
-      padding: 30px;
+      padding: 35px;
       border-radius: 12px;
       width: 100%;
-      max-width: 360px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      max-width: 380px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      border: 1px solid #eae3db;
+      text-align: center;
     }
   </style>
 </head>
+
 <body>
 
-  <!-- Login -->
+  <!-- Pantalla de Login -->
   <div id="login-screen">
     <div class="login-box">
-      <h2 style="margin-top:0; margin-bottom:15px; text-align:center;">Iniciar Sesión</h2>
+      <h1 class="brand-title" style="font-size:2.4rem;">Enreve®sada</h1>
+      <p class="sub-title" style="margin-bottom: 25px;">Acceso al panel de escritora</p>
+      
       <form id="login-form">
-        <div class="form-group">
+        <div class="form-group" style="text-align: left;">
           <label for="login-email">Correo electrónico</label>
           <input type="email" id="login-email" required placeholder="tucorreo@ejemplo.com">
         </div>
-        <div class="form-group">
+        <div class="form-group" style="text-align: left;">
           <label for="login-password">Contraseña</label>
           <input type="password" id="login-password" required placeholder="••••••••">
         </div>
-        <button type="submit" class="btn-primary" style="width: 100%;">Entrar al panel</button>
-        <p id="login-error" style="color: #d32f2f; font-size: 0.85rem; margin-top: 10px; display: none; text-align: center;"></p>
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Entrar al taller</button>
+        <p id="login-error" style="color: #c62828; font-size: 0.85rem; margin-top: 15px; display: none;"></p>
       </form>
     </div>
   </div>
 
-  <!-- Panel -->
+  <!-- Panel de Administración -->
   <div class="container" id="admin-panel" style="display: none;">
+    <div class="brand-header">
+      <h1 class="brand-title">Enreve®sada</h1>
+      <p class="sub-title">Escritorio de Autora</p>
+    </div>
+
     <div class="header-bar">
-      <h1>Panel de Escritora</h1>
+      <h1>¿Qué te gustaría hacer hoy?</h1>
       <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
     </div>
 
-    <!-- Formulario para publicar -->
-    <form id="post-form">
-      <h2>Publicar nuevo escrito</h2>
-      
-      <div class="form-group">
-        <label for="titulo">Título</label>
-        <input type="text" id="titulo" placeholder="Ej: Las noches en calma" required>
-      </div>
-
-      <div class="form-group">
-        <label for="fecha">Fecha</label>
-        <input type="text" id="fecha" required>
-      </div>
-
-      <div class="form-group">
-        <label for="resumen">Resumen / Extracto</label>
-        <input type="text" id="resumen" placeholder="Breve frase para la vista previa..." required>
-      </div>
-
-      <div class="form-group">
-        <label for="imagen">Imagen (Opcional)</label>
-        <input type="file" id="imagen" accept="image/*">
-      </div>
-
-      <div class="form-group">
-        <label for="contenido">Contenido completo</label>
-        <textarea id="contenido" placeholder="Escribe aquí el texto..." required></textarea>
-      </div>
-
-      <button type="submit" id="btn-submit" class="btn-primary">Publicar escrito</button>
-      <div id="status" class="status-msg"></div>
-    </form>
-
-    <!-- Métricas de Impacto (Vistas y Likes) -->
-    <h2>Métricas e impacto de mis escritos</h2>
-    <div id="posts-stats-container">Cargando métricas...</div>
-
-    <!-- Gestión de comentarios -->
-    <h2>Gestión de comentarios</h2>
-    <div class="tabs-nav">
-      <button class="tab-btn active" id="tab-pending" onclick="cambiarPestaña(false)">Pendientes</button>
-      <button class="tab-btn" id="tab-approved" onclick="cambiarPestaña(true)">Publicados (Aprobados)</button>
+    <!-- Navegador de Secciones (Desplegable / Selector) -->
+    <div class="section-selector">
+      <button class="selector-btn active" id="sel-publicar" onclick="mostrarSeccion('sec-publicar')">✍️ Publicar</button>
+      <button class="selector-btn" id="sel-metricas" onclick="mostrarSeccion('sec-metricas')">📊 Métricas e Impacto</button>
+      <button class="selector-btn" id="sel-comentarios" onclick="mostrarSeccion('sec-comentarios')">💬 Comentarios</button>
     </div>
 
-    <div id="comments-container">Cargando comentarios...</div>
+    <!-- SECCIÓN 1: PUBLICAR -->
+    <section id="sec-publicar" class="admin-section active">
+      <form id="post-form">
+        <div class="form-group">
+          <label for="titulo">Título del escrito</label>
+          <input type="text" id="titulo" placeholder="Ej: Las noches en calma" required>
+        </div>
+
+        <div class="form-group">
+          <label for="fecha">Fecha de publicación</label>
+          <input type="text" id="fecha" required>
+        </div>
+
+        <div class="form-group">
+          <label for="resumen">Resumen o frase destacada</label>
+          <input type="text" id="resumen" placeholder="Un breve adelanto para la vista previa..." required>
+        </div>
+
+        <div class="form-group">
+          <label for="imagen">Imagen (Opcional)</label>
+          <input type="file" id="imagen" accept="image/*">
+        </div>
+
+        <div class="form-group">
+          <label for="contenido">Texto completo del escrito</label>
+          <textarea id="contenido" placeholder="Escribe aquí tu obra..." required></textarea>
+        </div>
+
+        <button type="submit" id="btn-submit" class="btn-primary">Publicar escrito</button>
+        <div id="status" class="status-msg"></div>
+      </form>
+    </section>
+
+    <!-- SECCIÓN 2: MÉTRICAS -->
+    <section id="sec-metricas" class="admin-section">
+      <div id="posts-stats-container">Cargando métricas...</div>
+    </section>
+
+    <!-- SECCIÓN 3: COMENTARIOS -->
+    <section id="sec-comentarios" class="admin-section">
+      <div class="tabs-subnav">
+        <button class="subtab-btn active" id="tab-pending" onclick="cambiarPestañaComentarios(false)">Pendientes</button>
+        <button class="subtab-btn" id="tab-approved" onclick="cambiarPestañaComentarios(true)">Aprobados</button>
+      </div>
+
+      <div id="comments-container">Cargando comentarios...</div>
+    </section>
   </div>
 
   <script>
@@ -228,7 +425,25 @@
     const SUPABASE_KEY = 'sb_publishable_A55H3d-UeWQCgIP6MYgrBw_25qhZneL';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let estadoFiltroActual = false;
+    let estadoFiltroComentarios = false;
+
+    // Control del Selector de Secciones
+    function mostrarSeccion(seccionId) {
+      document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.selector-btn').forEach(btn => btn.classList.remove('active'));
+
+      document.getElementById(seccionId).classList.add('active');
+
+      if (seccionId === 'sec-publicar') document.getElementById('sel-publicar').classList.add('active');
+      if (seccionId === 'sec-metricas') {
+        document.getElementById('sel-metricas').classList.add('active');
+        cargarMetricasEscritos();
+      }
+      if (seccionId === 'sec-comentarios') {
+        document.getElementById('sel-comentarios').classList.add('active');
+        cargarComentarios(estadoFiltroComentarios);
+      }
+    }
 
     async function chequearSesion() {
       const { data: { session } } = await _supabase.auth.getSession();
@@ -243,11 +458,9 @@
     function mostrarPanel() {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('admin-panel').style.display = 'block';
-      
+
       const hoy = new Date();
       document.getElementById('fecha').value = hoy.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
-      cargarMetricasEscritos();
-      cargarComentarios(estadoFiltroActual);
     }
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -271,52 +484,15 @@
       window.location.reload();
     }
 
-    // Cargar estadísticas de vistas y likes
-    async function cargarMetricasEscritos() {
-      const container = document.getElementById('posts-stats-container');
-      const { data: posts, error } = await _supabase
-        .from('escritos')
-        .select('id, titulo, fecha, likes, vistas')
-        .order('id', { ascending: false });
-
-      if (error || !posts || posts.length === 0) {
-        container.innerHTML = '<p style="color:#777; font-size:0.9rem;">Aún no hay publicaciones creadas.</p>';
-        return;
-      }
-
-      container.innerHTML = `
-        <table class="stats-table">
-          <thead>
-            <tr>
-              <th>Título</th>
-              <th>Fecha</th>
-              <th>Lecturas</th>
-              <th>Likes</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${posts.map(p => `
-              <tr>
-                <td><strong>${p.titulo || 'Sin título'}</strong></td>
-                <td style="color:#666;">${p.fecha || ''}</td>
-                <td><span class="badge badge-views">👁️ ${p.vistas || 0} lecturas</span></td>
-                <td><span class="badge badge-likes">❤️ ${p.likes || 0} likes</span></td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
-    }
-
     // Publicar escrito
     document.getElementById('post-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btnSubmit = document.getElementById('btn-submit');
       const status = document.getElementById('status');
-      
+
       status.style.display = 'none';
       btnSubmit.disabled = true;
-      btnSubmit.textContent = 'Subiendo y publicando...';
+      btnSubmit.textContent = 'Publicando...';
 
       const titulo = document.getElementById('titulo').value.trim();
       const fecha = document.getElementById('fecha').value.trim();
@@ -343,11 +519,10 @@
 
         if (insertError) throw new Error('Error al guardar el escrito: ' + insertError.message);
 
-        status.textContent = '¡Escrito publicado con éxito en la web!';
+        status.textContent = '¡Escrito publicado con éxito!';
         status.className = 'status-msg success';
         status.style.display = 'block';
         document.getElementById('post-form').reset();
-        cargarMetricasEscritos();
 
       } catch (err) {
         status.textContent = err.message;
@@ -359,8 +534,48 @@
       }
     });
 
-    function cambiarPestaña(esAprobado) {
-      estadoFiltroActual = esAprobado;
+    // Cargar estadísticas
+    async function cargarMetricasEscritos() {
+      const container = document.getElementById('posts-stats-container');
+      container.innerHTML = '<p style="color:#777; font-size:0.9rem;">Cargando métricas de impacto...</p>';
+
+      const { data: posts, error } = await _supabase
+        .from('escritos')
+        .select('id, titulo, fecha, likes, vistas')
+        .order('id', { ascending: false });
+
+      if (error || !posts || posts.length === 0) {
+        container.innerHTML = '<p style="color:#777; font-size:0.9rem;">Aún no hay datos de publicaciones.</p>';
+        return;
+      }
+
+      container.innerHTML = `
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Fecha</th>
+              <th>Lecturas</th>
+              <th>Me gusta</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${posts.map(p => `
+              <tr>
+                <td><strong>${p.titulo || 'Sin título'}</strong></td>
+                <td style="color:#666;">${p.fecha || ''}</td>
+                <td><span class="badge badge-views">👁️ ${p.vistas || 0}</span></td>
+                <td><span class="badge badge-likes">❤️ ${p.likes || 0}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Cargar comentarios
+    function cambiarPestañaComentarios(esAprobado) {
+      estadoFiltroComentarios = esAprobado;
       document.getElementById('tab-pending').classList.toggle('active', !esAprobado);
       document.getElementById('tab-approved').classList.toggle('active', esAprobado);
       cargarComentarios(esAprobado);
@@ -385,7 +600,7 @@
         <div class="comment-card" id="comm-${c.id}">
           <div class="comment-info">
             <strong>${c.nombre}</strong>
-            <p>${c.texto}</p>
+            <p>"${c.texto}"</p>
             <small>Escrito ID: ${c.escrito_id}</small>
           </div>
           <div class="comment-actions">
@@ -402,16 +617,17 @@
 
     async function cambiarEstadoComentario(id, nuevoEstado) {
       const { error } = await _supabase.from('comentarios').update({ aprobado: nuevoEstado }).eq('id', id);
-      if (!error) cargarComentarios(estadoFiltroActual);
+      if (!error) cargarComentarios(estadoFiltroComentarios);
     }
 
     async function eliminarComentario(id) {
-      if (!confirm('¿Seguro que deseas eliminar este comentario?')) return;
+      if (!confirm('¿Deseas eliminar permanentemente este comentario?')) return;
       const { error } = await _supabase.from('comentarios').delete().eq('id', id);
-      if (!error) cargarComentarios(estadoFiltroActual);
+      if (!error) cargarComentarios(estadoFiltroComentarios);
     }
 
     chequearSesion();
   </script>
 </body>
+
 </html>
