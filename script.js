@@ -178,13 +178,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    // Desplegar escrito
+    // Desplegar escrito y contar vista
     const btn = article.querySelector('.toggle-btn');
     const postFull = article.querySelector('.post-full');
 
-    let yaContado = false; // Para contar solo 1 vez por sesión si abre/cierra
+    let yaContado = false;
 
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       if (postFull.style.display === 'block') {
         postFull.style.display = 'none';
         btn.textContent = 'Leer escrito completo';
@@ -192,10 +192,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         postFull.style.display = 'block';
         btn.textContent = 'Leer menos';
 
-        // Sumar lectura solo la primera vez que despliega el texto
         if (!yaContado) {
           yaContado = true;
-          await _supabase.rpc('incrementar_vista', { post_id: post.id });
+          try {
+            await _supabase.rpc('incrementar_vista', { post_id: post.id });
+          } catch (err) {
+            console.error('Error sumando lectura:', err);
+          }
         }
       }
     });
