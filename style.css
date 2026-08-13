@@ -11,7 +11,11 @@
   --font-sans-clean: 'Inter', sans-serif;
 }
 
-/* Reset básico */
+/* Reset básico y control de texto en móvil */
+* {
+  box-sizing: border-box;
+}
+
 body {
   background-color: var(--bg-color);
   color: var(--text-main);
@@ -20,13 +24,19 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+
+  /* EVITAR QUE LAS PALABRAS SE CORTEN A LA MITAD EN MÓVIL */
+  word-break: normal;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: manual;
 }
 
-/* Contenedor principal angosto */
+/* Contenedor principal responsive */
 .container {
   max-width: 650px;
   margin: 0 auto;
-  padding: 60px 20px;
+  padding: 40px 20px;
 }
 
 /* Estilo de Cabecera (Sección Portada) */
@@ -45,49 +55,49 @@ body {
   font-weight: 300;
 }
 
-/* Agrupador de Título y Subtítulo */
 /* Agrupador principal de foto + título */
 .brand-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px; /* Espacio entre la foto y el texto */
+  gap: 20px;
   margin-top: 10px;
 }
 
 /* Imagen de perfil circular */
 .profile-avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 100%; /* Hace la foto circular */
-  object-fit: cover;  /* Mantiene las proporciones sin deformar la cara */
-  border: 3px solid var(--detail-pink); /* Sutil borde rosa pastel acorde a la portada */
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--detail-pink);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
 }
 
 /* Agrupador de Título y Subtítulo */
 .brand-title {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Alinea el texto a la izquierda de la foto */
+  align-items: flex-start;
   text-align: left;
 }
 
 .accent-title {
   font-family: var(--font-script);
   color: black;
-  font-size: 3.8rem;
+  font-size: 3.5rem;
   font-weight: 400;
   margin: 0;
-  line-height: 0.9; /* Pegado vertical */
+  line-height: 0.9;
 }
 
 .sub-title {
   font-family: var(--font-serif-main);
   color: var(--text-muted);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 400;
-  margin-top: 4px;
+  margin-top: 6px;
   margin-bottom: 0;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -103,27 +113,29 @@ body {
 /* Borde rasgado decorativo (Paper Edge) */
 .paper-edge {
   height: 25px;
-  margin-bottom: 60px;
+  margin-bottom: 40px;
   background: linear-gradient(to right, var(--detail-pink) 0%, transparent 100%);
   border-bottom: 1px solid var(--detail-pink);
   box-shadow: 0 4px 6px rgba(242, 216, 216, 0.3);
 }
 
-/* Formulario de Suscripción */
+/* Formulario de Suscripción (Adaptado a pantalla móvil) */
 .newsletter-form {
   display: flex;
-  gap: 12px;
-  margin-top: 40px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 30px;
   justify-content: center;
 }
 
 .newsletter-form input {
-  padding: 14px 18px;
+  padding: 12px 16px;
   border: 1px solid var(--detail-pink);
   border-radius: 8px;
   font-family: var(--font-sans-clean);
   font-size: 0.95rem;
-  width: 300px;
+  width: 100%;
+  max-width: 300px;
   background-color: #ffffff;
   outline: none;
 }
@@ -137,12 +149,12 @@ body {
   background: var(--accent-rose);
   color: #ffffff;
   border: none;
-  padding: 14px 30px;
+  padding: 12px 24px;
   border-radius: 8px;
   cursor: pointer;
   font-family: var(--font-sans-clean);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 1px;
   transition: background 0.2s;
@@ -164,7 +176,7 @@ body {
   letter-spacing: 3px;
   color: var(--text-muted);
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 40px;
   position: relative;
 }
 
@@ -177,6 +189,19 @@ body {
   margin: 15px auto 0;
 }
 
+.instagram-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease, border-bottom 0.2s ease;
+  border-bottom: 1px dashed transparent;
+}
+
+.instagram-link:hover {
+  color: var(--accent-rose);
+  border-bottom-color: var(--accent-rose);
+}
+
+/* Tarjetas de Entradas */
 .post-card {
   margin-bottom: 45px;
   padding-bottom: 30px;
@@ -197,14 +222,16 @@ body {
   font-weight: 500;
   color: var(--text-main);
   margin: 0 0 12px 0;
+  line-height: 1.3;
 }
 
 .excerpt {
   font-family: var(--font-serif-main);
   color: #4a4a4a;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 300;
   line-height: 1.8;
+  margin: 0;
 }
 
 /* Texto desplegado */
@@ -219,6 +246,16 @@ body {
 
 .post-full p {
   margin-bottom: 15px;
+  line-height: 1.8;
+}
+
+.post-image {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  border-radius: 8px;
+  margin: 15px auto;
+  display: block;
 }
 
 /* Botón de desplegar */
@@ -241,123 +278,7 @@ body {
   text-decoration: underline;
 }
 
-/* Pie de página */
-.main-footer {
-  text-align: center;
-  margin-top: 80px;
-  padding-top: 30px;
-}
-
-
-/* Estilo para los enlaces de privacidad y copyright en el footer */
-.footer-legal {
-  margin-top: 15px;
-  font-size: 0.8rem;
-  color: #888;
-}
-
-.footer-legal a {
-  color: #888;
-  text-decoration: underline;
-  transition: color 0.2s ease;
-}
-
-.footer-legal a:hover {
-  color: #333;
-}
-
-.divider {
-  width: 100px;
-  height: 1px;
-  background: var(--detail-pink);
-  margin: 0 auto;
-}
-
-.author-credit {
-  font-family: var(--font-sans-clean);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  color: var(--text-muted);
-  margin-top: 10px;
-}
-
-
-
-/* Estilo del enlace de Instagram dentro de author-label */
-.instagram-link {
-  color: var(--text-muted);
-  text-decoration: none;
-  transition: color 0.2s ease, border-bottom 0.2s ease;
-  border-bottom: 1px dashed transparent;
-}
-
-/* Efecto al pasar el cursor */
-.instagram-link:hover {
-  color: var(--accent-rose);
-  border-bottom-color: var(--accent-rose);
-}
-
-.post-image {
-  width: 100%;
-  max-width: 500px;
-  height: auto;
-  border-radius: 8px;
-  margin: 15px auto;
-  display: block;
-}
-
-/* Botones de interacción */
-.post-actions {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin: 15px 0;
-}
-
-.like-btn {
-  background: transparent;
-  border: 1px solid #d4a3a3;
-  color: #8c4a4a;
-  padding: 6px 14px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.3s ease;
-}
-
-/* Corrección para el botón Me gusta */
-.like-btn.liked {
-  background-color: transparent !important;
-}
-
-.like-btn.liked svg {
-  fill: #d4a3a3 !important;
-  stroke: #d4a3a3 !important;
-}
-
-.like-btn.liked .like-count {
-  color: #d4a3a3 !important;
-  font-weight: bold;
-}
-
-.share-btn {
-  color: #25d366;
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  border: 1px solid #25d366;
-  padding: 5px 12px;
-  border-radius: 20px;
-}
-
-.comments-section {
-  margin-top: 20px;
-  padding-top: 10px;
-  border-top: 1px dashed #eee;
-}
-
-/* Barra de acciones minimalista */
+/* Barra de acciones (Me gusta, Comentar, Compartir) */
 .post-actions {
   display: flex;
   align-items: center;
@@ -374,7 +295,6 @@ body {
   gap: 12px;
 }
 
-/* Botones con icono */
 .icon-btn {
   background: none;
   border: none;
@@ -393,16 +313,17 @@ body {
   color: #333;
 }
 
+/* Estado Me Gusta activado */
 .like-btn.liked svg {
-  fill: #d4a3a3;
-  stroke: #d4a3a3;
+  fill: #d4a3a3 !important;
+  stroke: #d4a3a3 !important;
 }
 
 .like-btn.liked .like-count {
-  color: #d4a3a3;
+  color: #d4a3a3 !important;
+  font-weight: bold;
 }
 
-/* Botón Compartir tipo píldora */
 .share-btn {
   background-color: #f7f2f2;
   color: #555;
@@ -425,16 +346,69 @@ body {
   border-radius: 8px;
 }
 
-/* Dar más altura y espacio al contenedor de comentarios */
-.comments-dropdown iframe {
-  width: 100% !important;
-  min-height: 400px !important; /* Ajusta este valor si necesitas más espacio */
-  border: none !important;
-}
-
 .comments-title {
   font-weight: bold;
   margin-bottom: 10px;
   font-size: 0.95rem;
   color: #444;
+}
+
+/* Pie de página */
+.main-footer {
+  text-align: center;
+  margin-top: 60px;
+  padding-top: 30px;
+}
+
+.divider {
+  width: 100px;
+  height: 1px;
+  background: var(--detail-pink);
+  margin: 0 auto;
+}
+
+.author-credit {
+  font-family: var(--font-sans-clean);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  margin-top: 10px;
+}
+
+.footer-legal {
+  margin-top: 15px;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.footer-legal a {
+  color: #888;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.footer-legal a:hover {
+  color: #333;
+}
+
+/* Ajustes especiales para pantallas de móvil estrechas */
+@media (max-width: 480px) {
+  .brand-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .brand-title {
+    align-items: center;
+    text-align: center;
+  }
+  
+  .accent-title {
+    font-size: 3rem;
+  }
+  
+  .container {
+    padding: 30px 15px;
+  }
 }

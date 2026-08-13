@@ -5,10 +5,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enreve®sada</title>
+  
+  <!-- Estilos (asegúrate de que el nombre coincida con tu archivo CSS en GitHub) -->
   <link rel="stylesheet" href="style.css">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500;700&family=Playball&family=Inter:wght@300;400;600&display=swap"
-    rel="stylesheet">
+  
+  <!-- Fuentes de Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500;700&family=Playball&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   
   <!-- Conector Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -40,10 +44,10 @@
         action="https://e39fbd44.sibforms.com/serve/MUIFAKcdCuXxQUpQs9S6d7dZFlfQ8uOSFkO5sOyLy-tfhyDM6UwBA8cQulz_EzkvEJDxNgLiaVmXgC-fjJzD6ffBXzBEDBatxvGtnHlG2vNHnbMKJnUR5YDLIoGv207Dz6o2s7CiRRykT8y25LaezKX9RkJ1JHfCrDufL1JXLmCwMO55fFG__9xne-XIhgudEHtBaBf6f2v2RQ7c9Q=="
         method="POST">
         <input type="email" id="newsletterEmail" name="EMAIL"
-          placeholder="Recibe mis nuevas publicaciones en tu correo..." required>
+          placeholder="Recibe mis publicaciones en tu correo..." required autocomplete="email">
         <button type="submit">Suscribirse</button>
       </form>
-      <p id="newsletterMessage" style="display:none; color: #8c4a4a; margin-top: 10px; font-weight: 500;"></p>
+      <p id="newsletterMessage" style="display:none; color: #8c4a4a; margin-top: 10px; font-size: 0.9em; font-weight: 500;"></p>
 
       <script>
         document.getElementById('newsletterForm').addEventListener('submit', function (e) {
@@ -92,13 +96,14 @@
       <p class="author-credit">Enreve®sada &reg;</p>
 
       <p class="footer-legal">
-        © 2026 Enreve®sada · <a href="https://www.brevo.com/es/legal/privacypolicy/" target="_blank">Privacidad</a> · <a
-          href="https://www.brevo.com/es/legal/termsofuse/" target="_blank">Aviso legal</a>
+        © 2026 Enreve®sada · <a href="https://www.brevo.com/es/legal/privacypolicy/" target="_blank" rel="noopener">Privacidad</a> · <a
+          href="https://www.brevo.com/es/legal/termsofuse/" target="_blank" rel="noopener">Aviso legal</a>
       </p>
     </footer>
 
   </main>
 
+  <!-- Lógica de Supabase y de la web -->
   <script src="script.js"></script>
 </body>
 
